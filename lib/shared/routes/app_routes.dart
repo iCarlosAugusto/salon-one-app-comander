@@ -20,7 +20,7 @@ abstract class Routes {
   // Employees
   static const employees = '/employees';
   static const employeeDetail = '/employees/:id';
-  static const employeeCreate = '/employees/create';
+  static const employeeCreate = '/employeesCreate';
   static const employeeEdit = '/employees/:id/edit';
   static const employeeSchedule = '/employees/:id/schedule';
 
