@@ -20,7 +20,7 @@ abstract class Routes {
   // Employees
   static const employees = '/employees';
   static const employeeDetail = '/employees/:id';
-  static const employeeForm = '/employees/form';
+  static const employeeCreate = '/employees/create';
   static const employeeEdit = '/employees/:id/edit';
   static const employeeSchedule = '/employees/:id/schedule';
 
@@ -28,4 +28,11 @@ abstract class Routes {
   static const settings = '/settings';
   static const salonProfile = '/settings/profile';
   static const bookingSettings = '/settings/booking';
+
+  // Helper methods for dynamic routes
+  static String employeeDetailPath(String id) => '/employees/$id';
+  static String employeeEditPath(String id) => '/employees/$id/edit';
+  static String appointmentDetailPath(String id) => '/appointments/$id';
+  static String appointmentEditPath(String id) => '/appointments/$id/edit';
+  static String serviceEditPath(String id) => '/services/$id/edit';
 }

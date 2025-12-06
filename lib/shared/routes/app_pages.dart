@@ -6,8 +6,12 @@ import '../../modules/appointments/appointments_view.dart';
 import '../../modules/appointments/appointments_binding.dart';
 import '../../modules/services/services_view.dart';
 import '../../modules/services/services_binding.dart';
-import '../../modules/employees/employees_view.dart';
-import '../../modules/employees/employees_binding.dart';
+import '../../modules/employees/list/employees_list_view.dart';
+import '../../modules/employees/list/employees_list_binding.dart';
+import '../../modules/employees/detail/employee_detail_view.dart';
+import '../../modules/employees/detail/employee_detail_binding.dart';
+import '../../modules/employees/form/employee_form_view.dart';
+import '../../modules/employees/form/employee_form_binding.dart';
 import '../../modules/settings/settings_view.dart';
 import '../../modules/settings/settings_binding.dart';
 
@@ -54,16 +58,26 @@ class AppPages {
       binding: ServicesBinding(),
     ),
 
-    // Employees
+    // Employees - Refactored with separate screens
     GetPage(
       name: Routes.employees,
-      page: () => const EmployeesView(),
-      binding: EmployeesBinding(),
+      page: () => const EmployeesListView(),
+      binding: EmployeesListBinding(),
     ),
     GetPage(
-      name: Routes.employeeForm,
-      page: () => const EmployeesView(),
-      binding: EmployeesBinding(),
+      name: Routes.employeeDetail,
+      page: () => const EmployeeDetailView(),
+      binding: EmployeeDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.employeeCreate,
+      page: () => const EmployeeFormView(),
+      binding: EmployeeFormBinding(),
+    ),
+    GetPage(
+      name: Routes.employeeEdit,
+      page: () => const EmployeeFormView(),
+      binding: EmployeeFormBinding(),
     ),
 
     // Settings

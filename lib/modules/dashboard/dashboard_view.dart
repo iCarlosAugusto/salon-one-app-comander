@@ -258,7 +258,7 @@ class DashboardView extends GetView<DashboardController> {
           _QuickActionButton(
             icon: Icons.person_add_outlined,
             label: 'Add Employee',
-            onTap: () => Get.toNamed(Routes.employeeForm),
+            onTap: () => Get.toNamed(Routes.employeeCreate),
           ),
           _QuickActionButton(
             icon: Icons.add_box_outlined,
