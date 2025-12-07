@@ -154,7 +154,7 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
           _buildScheduleSection(context),
           const SizedBox(height: AppConstants.spacingLg),
 
-          // Services section
+          // Services section with manage button
           _buildServicesSection(context),
           const SizedBox(height: AppConstants.spacingLg),
 
@@ -293,13 +293,30 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Services',
-                style: TextStyle(
-                  color: theme.colorScheme.foreground,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Services',
+                    style: TextStyle(
+                      color: theme.colorScheme.foreground,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  ShadButton.outline(
+                    onPressed: () => _showAssignServicesDialog(context),
+                    size: ShadButtonSize.sm,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.edit, size: 14),
+                        SizedBox(width: 4),
+                        Text('Manage'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Obx(() {
@@ -307,11 +324,27 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(AppConstants.spacingLg),
-                      child: Text(
-                        'No services assigned',
-                        style: TextStyle(
-                          color: theme.colorScheme.mutedForeground,
-                        ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.spa_outlined,
+                            size: 40,
+                            color: theme.colorScheme.mutedForeground,
+                          ),
+                          const SizedBox(height: AppConstants.spacingSm),
+                          Text(
+                            'No services assigned',
+                            style: TextStyle(
+                              color: theme.colorScheme.mutedForeground,
+                            ),
+                          ),
+                          const SizedBox(height: AppConstants.spacingSm),
+                          ShadButton.ghost(
+                            onPressed: () => _showAssignServicesDialog(context),
+                            size: ShadButtonSize.sm,
+                            child: const Text('Assign Services'),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -328,17 +361,32 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.muted,
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(
                               AppConstants.radiusMd,
                             ),
-                          ),
-                          child: Text(
-                            service.name,
-                            style: TextStyle(
-                              color: theme.colorScheme.foreground,
-                              fontSize: 13,
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
                             ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.spa,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                service.name,
+                                style: TextStyle(
+                                  color: theme.colorScheme.foreground,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -349,6 +397,13 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showAssignServicesDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => _AssignServicesDialog(controller: controller),
     );
   }
 
@@ -365,6 +420,210 @@ class EmployeeDetailView extends GetView<EmployeeDetailController> {
     if (confirmed == true) {
       controller.deleteEmployee();
     }
+  }
+}
+
+/// Dialog for assigning services to an employee
+class _AssignServicesDialog extends StatelessWidget {
+  const _AssignServicesDialog({required this.controller});
+
+  final EmployeeDetailController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+
+    return Dialog(
+      backgroundColor: theme.colorScheme.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+      ),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        padding: const EdgeInsets.all(AppConstants.spacingLg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Assign Services',
+                  style: TextStyle(
+                    color: theme.colorScheme.foreground,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(
+                    Icons.close,
+                    color: theme.colorScheme.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacingSm),
+            Text(
+              'Select the services this employee can perform:',
+              style: TextStyle(
+                color: theme.colorScheme.mutedForeground,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingMd),
+            const Divider(height: 1),
+            const SizedBox(height: AppConstants.spacingMd),
+
+            // Services list
+            Expanded(
+              child: Obx(() {
+                if (controller.allServices.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No services available',
+                      style: TextStyle(
+                        color: theme.colorScheme.mutedForeground,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: controller.allServices.length,
+                  itemBuilder: (context, index) {
+                    final service = controller.allServices[index];
+                    return Obx(() {
+                      final isSelected = controller.selectedServiceIds.contains(
+                        service.id,
+                      );
+                      return InkWell(
+                        onTap: () => controller.toggleService(service.id),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingSm,
+                            vertical: AppConstants.spacingMd,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primary.withValues(alpha: 0.1)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusSm,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              ShadCheckbox(
+                                value: isSelected,
+                                onChanged: (_) =>
+                                    controller.toggleService(service.id),
+                              ),
+                              const SizedBox(width: AppConstants.spacingSm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      service.name,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.foreground,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    if (service.description != null &&
+                                        service.description!.isNotEmpty)
+                                      Text(
+                                        service.description!,
+                                        style: TextStyle(
+                                          color:
+                                              theme.colorScheme.mutedForeground,
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                'R\$ ${service.price.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+                  },
+                );
+              }),
+            ),
+            const SizedBox(height: AppConstants.spacingMd),
+            const Divider(height: 1),
+            const SizedBox(height: AppConstants.spacingMd),
+
+            // Footer with count and save button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Obx(
+                  () => Text(
+                    '${controller.selectedServiceIds.length} services selected',
+                    style: TextStyle(
+                      color: theme.colorScheme.mutedForeground,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    ShadButton.outline(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: AppConstants.spacingSm),
+                    Obx(
+                      () => ShadButton(
+                        onPressed: controller.isSavingServices.value
+                            ? null
+                            : () async {
+                                final success = await controller
+                                    .saveServiceAssignments();
+                                if (success && context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                        child: controller.isSavingServices.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

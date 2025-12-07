@@ -86,10 +86,22 @@ class ApiClient extends GetConnect {
   /// Generic DELETE request
   Future<ApiResponse<T>> deleteRequest<T>(
     String endpoint, {
+    dynamic body,
     T Function(dynamic)? decoder,
   }) async {
     try {
-      final response = await delete<dynamic>(endpoint);
+      // GetConnect's delete doesn't support body, so use request method for DELETE with body
+      final Response<dynamic> response;
+      if (body != null) {
+        response = await httpClient.request<dynamic>(
+          endpoint,
+          'DELETE',
+          body: body,
+          contentType: 'application/json',
+        );
+      } else {
+        response = await delete<dynamic>(endpoint);
+      }
       return _handleResponse(response, decoder);
     } catch (e) {
       return ApiResponse.error('Network error: $e');

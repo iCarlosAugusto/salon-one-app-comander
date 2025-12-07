@@ -106,4 +106,34 @@ class EmployeeService extends GetxService {
       decoder: (data) => ScheduleModel.fromJson(data as Map<String, dynamic>),
     );
   }
+
+  /// Assign services to an employee
+  Future<ApiResponse<List<ServiceModel>>> assignServices(
+    String employeeId,
+    List<String> serviceIds,
+  ) async {
+    return _client.postRequest<List<ServiceModel>>(
+      ApiEndpoints.employeeServices(employeeId),
+      body: {'serviceIds': serviceIds},
+      decoder: (data) {
+        if (data is List) {
+          return data
+              .map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+        return [];
+      },
+    );
+  }
+
+  /// Unassign services from an employee
+  Future<ApiResponse<void>> unassignServices(
+    String employeeId,
+    List<String> serviceIds,
+  ) async {
+    return _client.deleteRequest<void>(
+      ApiEndpoints.employeeServices(employeeId),
+      body: {'serviceIds': serviceIds},
+    );
+  }
 }
