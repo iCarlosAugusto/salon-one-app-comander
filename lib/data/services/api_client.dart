@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/api_endpoints.dart';
+import '../../shared/routes/app_routes.dart';
 
 /// Base API client using GetConnect for HTTP requests
 class ApiClient extends GetConnect {
@@ -8,19 +10,28 @@ class ApiClient extends GetConnect {
     httpClient.baseUrl = ApiEndpoints.baseUrl;
     httpClient.timeout = const Duration(seconds: 30);
 
-    // Add default headers
+    // Add default headers with JWT authentication
     httpClient.addRequestModifier<dynamic>((request) {
       request.headers['Content-Type'] = 'application/json';
       request.headers['Accept'] = 'application/json';
-      // TODO: Add authentication header when implemented
-      // request.headers['Authorization'] = 'Bearer $token';
+
+      // Get JWT from Supabase session
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session != null) {
+        request.headers['Authorization'] = 'Bearer ${session.accessToken}';
+      }
+
       return request;
     });
 
-    // Add response interceptor for error handling
+    // Add response interceptor for error handling and 401 detection
     httpClient.addResponseModifier((request, response) {
-      // Log responses in debug mode
-      // print('Response: ${response.statusCode} - ${request.url}');
+      // Handle unauthorized responses by redirecting to login
+      if (response.statusCode == 401) {
+        // Clear session and redirect to login
+        Supabase.instance.client.auth.signOut();
+        Get.offAllNamed(Routes.login);
+      }
       return response;
     });
 

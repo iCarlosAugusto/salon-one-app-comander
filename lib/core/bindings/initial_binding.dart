@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import '../../data/services/api_client.dart';
+import '../../data/services/session_service.dart';
+import '../../data/services/auth_service.dart';
 import '../../data/services/salon_service.dart';
 import '../../data/services/employee_service.dart';
 import '../../data/services/service_service.dart';
@@ -9,10 +11,14 @@ import '../../data/services/appointment_service.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    // API Client - must be registered first
+    // Auth services - must be registered first for session management
+    Get.put(SessionService(), permanent: true);
+    Get.put(AuthService(), permanent: true);
+
+    // API Client
     Get.put(ApiClient(), permanent: true);
 
-    // Services
+    // Domain Services
     Get.lazyPut(() => SalonService(), fenix: true);
     Get.lazyPut(() => EmployeeService(), fenix: true);
     Get.lazyPut(() => ServiceService(), fenix: true);

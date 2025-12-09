@@ -270,6 +270,13 @@ class DashboardView extends GetView<DashboardController> {
             label: 'Salon Settings',
             onTap: () => Get.toNamed(Routes.settings),
           ),
+          const Divider(height: 24),
+          _QuickActionButton(
+            icon: Icons.logout,
+            label: 'Sign Out',
+            onTap: () => controller.logout(),
+            isDestructive: true,
+          ),
         ],
       ),
     );
@@ -328,15 +335,18 @@ class _QuickActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isDestructive = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
+    final color = isDestructive ? AppColors.error : AppColors.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppConstants.spacingSm),
@@ -356,10 +366,10 @@ class _QuickActionButton extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppConstants.spacingSm),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 20),
+                  child: Icon(icon, color: color, size: 20),
                 ),
                 const SizedBox(width: AppConstants.spacingSm),
                 Expanded(

@@ -2,6 +2,9 @@
 abstract class Routes {
   Routes._();
 
+  // Auth routes
+  static const login = '/login';
+
   // Main routes
   static const home = '/';
   static const dashboard = '/dashboard';

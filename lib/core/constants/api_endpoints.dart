@@ -6,6 +6,9 @@ class ApiEndpoints {
   // TODO: Replace with your actual API base URL
   static const String baseUrl = 'http://localhost:3001';
 
+  // Auth endpoints
+  static const String authMe = '/auth/me';
+
   // Salon endpoints
   static const String salons = '/salons';
   static String salonById(String id) => '/salons/$id';

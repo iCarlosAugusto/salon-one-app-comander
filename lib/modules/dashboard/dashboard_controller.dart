@@ -7,7 +7,9 @@ import '../../data/services/appointment_service.dart';
 import '../../data/services/employee_service.dart';
 import '../../data/services/service_service.dart';
 import '../../data/services/salon_service.dart';
+import '../../data/services/auth_service.dart';
 import '../../data/models/salon_model.dart';
+import '../../shared/routes/app_routes.dart';
 
 /// Controller for the dashboard view
 class DashboardController extends GetxController {
@@ -147,4 +149,14 @@ class DashboardController extends GetxController {
 
   /// Refresh dashboard data
   Future<void> refresh() => loadDashboardData();
+
+  /// Sign out the current user
+  Future<void> logout() async {
+    try {
+      await Get.find<AuthService>().signOut();
+      Get.offAllNamed(Routes.login);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to sign out: $e');
+    }
+  }
 }
