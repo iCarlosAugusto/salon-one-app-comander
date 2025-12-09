@@ -45,13 +45,13 @@ class EmployeeFormView extends GetView<EmployeeFormController> {
 /// Model for work schedule entry
 class WorkScheduleEntry {
   final int dayOfWeek;
-  bool isEnabled;
+  bool isAvailable;
   String startTime;
   String endTime;
 
   WorkScheduleEntry({
     required this.dayOfWeek,
-    this.isEnabled = true,
+    this.isAvailable = true,
     this.startTime = '08:00',
     this.endTime = '18:00',
   });
@@ -59,6 +59,7 @@ class WorkScheduleEntry {
   Map<String, dynamic> toJson() => {
     'dayOfWeek': dayOfWeek,
     'startTime': startTime,
+    'isAvailable': isAvailable,
     'endTime': endTime,
   };
 
@@ -140,7 +141,7 @@ class _EmployeeFormContentState extends State<_EmployeeFormContent> {
       7,
       (index) => WorkScheduleEntry(
         dayOfWeek: index,
-        isEnabled: index != 0, // Sunday off by default
+        isAvailable: index != 0, // Sunday off by default
         startTime: '08:00',
         endTime: '18:00',
       ),
@@ -162,12 +163,6 @@ class _EmployeeFormContentState extends State<_EmployeeFormContent> {
 
   void _handleSave() {
     if (_formKey.currentState?.validate() ?? false) {
-      // Build work schedule from enabled days
-      final workScheduleData = _workSchedule
-          .where((entry) => entry.isEnabled)
-          .map((entry) => entry.toJson())
-          .toList();
-
       widget.onSave({
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
@@ -185,7 +180,7 @@ class _EmployeeFormContentState extends State<_EmployeeFormContent> {
         'hiredAt':
             widget.employee?.hiredAt ??
             DateTime.now().toIso8601String().split('T')[0],
-        'workSchedule': workScheduleData,
+        'workSchedule': _workSchedule,
       });
     }
   }
@@ -377,7 +372,7 @@ class _EmployeeFormContentState extends State<_EmployeeFormContent> {
                           Row(
                             children: [
                               Text(
-                                '${_workSchedule.where((e) => e.isEnabled).length} days',
+                                '${_workSchedule.where((e) => e.isAvailable).length} days',
                                 style: TextStyle(
                                   color: theme.colorScheme.mutedForeground,
                                   fontSize: 13,
@@ -465,9 +460,9 @@ class _ScheduleDayRow extends StatelessWidget {
         children: [
           // Day toggle
           ShadSwitch(
-            value: entry.isEnabled,
+            value: entry.isAvailable,
             onChanged: (value) {
-              entry.isEnabled = value;
+              entry.isAvailable = value;
               onChanged();
             },
           ),
@@ -479,7 +474,7 @@ class _ScheduleDayRow extends StatelessWidget {
             child: Text(
               WorkScheduleEntry.getDayName(entry.dayOfWeek),
               style: TextStyle(
-                color: entry.isEnabled
+                color: entry.isAvailable
                     ? theme.colorScheme.foreground
                     : theme.colorScheme.mutedForeground,
                 fontWeight: FontWeight.w500,
@@ -487,7 +482,7 @@ class _ScheduleDayRow extends StatelessWidget {
             ),
           ),
 
-          if (entry.isEnabled) ...[
+          if (entry.isAvailable) ...[
             const SizedBox(width: AppConstants.spacingSm),
 
             // Start time

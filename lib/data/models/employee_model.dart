@@ -1,7 +1,6 @@
 /// Employee model representing a staff member
 class EmployeeModel {
   final String id;
-  final String salonId;
   final String firstName;
   final String lastName;
   final String? email;
@@ -16,7 +15,6 @@ class EmployeeModel {
 
   EmployeeModel({
     required this.id,
-    required this.salonId,
     required this.firstName,
     required this.lastName,
     this.email,
@@ -43,7 +41,6 @@ class EmployeeModel {
   factory EmployeeModel.fromJson(Map<String, dynamic> json) {
     return EmployeeModel(
       id: json['id'] as String,
-      salonId: json['salonId'] as String,
       firstName: json['firstName'] as String,
       lastName: json['lastName'] as String,
       email: json['email'] as String?,
@@ -61,7 +58,6 @@ class EmployeeModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'salonId': salonId,
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
@@ -91,7 +87,6 @@ class EmployeeModel {
   }) {
     return EmployeeModel(
       id: id ?? this.id,
-      salonId: salonId ?? this.salonId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
