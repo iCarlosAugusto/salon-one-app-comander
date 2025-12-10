@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/formatters.dart';
@@ -33,6 +34,9 @@ class AppointmentsController extends GetxController {
 
   // View mode
   final viewMode = AppointmentViewMode.list.obs;
+
+  // Calendar mode
+  final calendarDate = DateTime.now().obs;
 
   String get salonId => AppConstants.defaultSalonId;
 
@@ -102,6 +106,13 @@ class AppointmentsController extends GetxController {
   void onInit() {
     super.onInit();
     loadData();
+
+    // Listen for calendar date changes and fetch appointments
+    ever(calendarDate, (_) {
+      if (viewMode.value == AppointmentViewMode.calendar) {
+        _loadAppointmentsForDate(calendarDate.value);
+      }
+    });
   }
 
   /// Load all data
@@ -124,13 +135,30 @@ class AppointmentsController extends GetxController {
   }
 
   Future<void> _loadAppointments() async {
-    final response = await _appointmentService.getAppointments(
-      salonId: salonId,
-    );
+    appointments.value = [];
+    final response = await _appointmentService.getAppointments();
     if (response.isSuccess && response.data != null) {
       appointments.value = response.data!;
     } else if (!response.isSuccess) {
       throw Exception(response.error);
+    }
+  }
+
+  /// Load appointments for a specific date (calendar mode)
+  Future<void> _loadAppointmentsForDate(DateTime date) async {
+    final dateStr = Formatters.formatDateForApi(date);
+    isLoading.value = true;
+    appointments.value = [];
+    try {
+      final response = await _appointmentService.getAppointments(date: dateStr);
+      if (response.isSuccess && response.data != null) {
+        appointments.value = response.data!;
+      }
+    } catch (e) {
+      // Silently fail for background fetches
+      debugPrint('Failed to load appointments for date: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -240,6 +268,50 @@ class AppointmentsController extends GetxController {
     viewMode.value = viewMode.value == AppointmentViewMode.list
         ? AppointmentViewMode.calendar
         : AppointmentViewMode.list;
+
+    // Fetch appointments for current calendar date when switching to calendar mode
+    if (viewMode.value == AppointmentViewMode.calendar) {
+      _loadAppointmentsForDate(calendarDate.value);
+    }
+  }
+
+  /// Get appointments for the current calendar date
+  List<AppointmentModel> get appointmentsForCalendarDate {
+    final dateStr = Formatters.formatDateForApi(calendarDate.value);
+    var filtered = appointments
+        .where((apt) => apt.appointmentDate == dateStr)
+        .toList();
+
+    // Apply employee filter if selected
+    if (selectedEmployeeId.value != null) {
+      filtered = filtered
+          .where((apt) => apt.employeeId == selectedEmployeeId.value)
+          .toList();
+    }
+
+    // Sort by start time
+    filtered.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return filtered;
+  }
+
+  /// Navigate to today
+  void goToToday() {
+    calendarDate.value = DateTime.now();
+  }
+
+  /// Navigate to next day
+  void goToNextDay() {
+    calendarDate.value = calendarDate.value.add(const Duration(days: 1));
+  }
+
+  /// Navigate to previous day
+  void goToPreviousDay() {
+    calendarDate.value = calendarDate.value.subtract(const Duration(days: 1));
+  }
+
+  /// Set calendar date
+  void setCalendarDate(DateTime date) {
+    calendarDate.value = date;
   }
 
   /// Refresh data

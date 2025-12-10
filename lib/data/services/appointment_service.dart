@@ -9,21 +9,20 @@ class AppointmentService extends GetxService {
 
   /// Get all appointments for a salon
   Future<ApiResponse<List<AppointmentModel>>> getAppointments({
-    required String salonId,
     String? employeeId,
     String? date,
   }) async {
-    var endpoint = ApiEndpoints.appointmentsBySalon(salonId);
+    var endpoint = ApiEndpoints.appointments;
 
     final queryParams = <String>[];
     if (employeeId != null) {
-      queryParams.add('employeeId=$employeeId');
+      queryParams.add('employeeIds=$employeeId');
     }
     if (date != null) {
       queryParams.add('date=$date');
     }
     if (queryParams.isNotEmpty) {
-      endpoint += '&${queryParams.join('&')}';
+      endpoint += '?${queryParams.join('&')}';
     }
 
     return _client.getRequest<List<AppointmentModel>>(

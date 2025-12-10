@@ -34,8 +34,6 @@ class ApiEndpoints {
   // Appointment endpoints
   static const String appointments = '/appointments';
   static String appointmentById(String id) => '/appointments/$id';
-  static String appointmentsBySalon(String salonId) =>
-      '/appointments?salonId=$salonId';
   static String appointmentStatus(String id) => '/appointments/$id/status';
   static String cancelAppointment(String id) => '/appointments/$id/cancel';
 

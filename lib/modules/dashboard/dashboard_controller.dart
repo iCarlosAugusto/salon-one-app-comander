@@ -80,19 +80,14 @@ class DashboardController extends GetxController {
     final dateStr =
         '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
-    final response = await _appointmentService.getAppointments(
-      salonId: salonId,
-      date: dateStr,
-    );
+    final response = await _appointmentService.getAppointments(date: dateStr);
 
     if (response.isSuccess && response.data != null) {
       todayAppointments.value = response.data!;
     }
 
     // Also load upcoming appointments (next 7 days)
-    final allResponse = await _appointmentService.getAppointments(
-      salonId: salonId,
-    );
+    final allResponse = await _appointmentService.getAppointments();
     if (allResponse.isSuccess && allResponse.data != null) {
       final now = DateTime.now();
       final weekFromNow = now.add(const Duration(days: 7));
