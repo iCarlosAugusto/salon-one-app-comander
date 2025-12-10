@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_colors.dart';
@@ -369,31 +368,6 @@ class AppointmentsView extends GetView<AppointmentsController> {
       spacing: AppConstants.spacingSm,
       runSpacing: AppConstants.spacingSm,
       children: [
-        // Search
-        SizedBox(
-          width: isDesktop ? 250 : double.infinity,
-          child: ShadInput(
-            placeholder: const Text('Search client...'),
-            // prefix: const Padding(
-            //   padding: EdgeInsets.only(left: 8),
-            //   child: Icon(Icons.search, size: 18),
-            // ),
-            onChanged: (value) => controller.searchQuery.value = value,
-          ),
-        ),
-        // Date filter
-        Obx(
-          () => _FilterChip(
-            label: controller.selectedDate.value != null
-                ? Formatters.formatDate(controller.selectedDate.value!)
-                : 'Any date',
-            isSelected: controller.selectedDate.value != null,
-            onTap: () => _showDatePicker(context),
-            onClear: controller.selectedDate.value != null
-                ? () => controller.selectedDate.value = null
-                : null,
-          ),
-        ),
         // Employee filter
         Obx(
           () => _FilterChip(
@@ -423,18 +397,6 @@ class AppointmentsView extends GetView<AppointmentsController> {
         ),
       ],
     );
-  }
-
-  Future<void> _showDatePicker(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: controller.selectedDate.value ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (date != null) {
-      controller.selectedDate.value = date;
-    }
   }
 
   void _showEmployeeFilter(BuildContext context) {

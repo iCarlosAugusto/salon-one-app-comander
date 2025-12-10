@@ -26,11 +26,8 @@ class AppointmentsController extends GetxController {
   final employees = <EmployeeModel>[].obs;
   final services = <ServiceModel>[].obs;
 
-  // Filters
-  final selectedDate = Rxn<DateTime>();
   final selectedEmployeeId = Rxn<String>();
   final selectedStatus = Rxn<AppointmentStatus>();
-  final searchQuery = ''.obs;
 
   // View mode
   final viewMode = AppointmentViewMode.list.obs;
@@ -44,14 +41,6 @@ class AppointmentsController extends GetxController {
   List<AppointmentModel> get filteredAppointments {
     var filtered = appointments.toList();
 
-    // Filter by date
-    if (selectedDate.value != null) {
-      final dateStr = Formatters.formatDateForApi(selectedDate.value!);
-      filtered = filtered
-          .where((apt) => apt.appointmentDate == dateStr)
-          .toList();
-    }
-
     // Filter by employee
     if (selectedEmployeeId.value != null) {
       filtered = filtered
@@ -64,16 +53,6 @@ class AppointmentsController extends GetxController {
       filtered = filtered
           .where((apt) => apt.status == selectedStatus.value)
           .toList();
-    }
-
-    // Filter by search query
-    if (searchQuery.value.isNotEmpty) {
-      final query = searchQuery.value.toLowerCase();
-      filtered = filtered.where((apt) {
-        return apt.clientName.toLowerCase().contains(query) ||
-            apt.clientPhone.contains(query) ||
-            (apt.clientEmail?.toLowerCase().contains(query) ?? false);
-      }).toList();
     }
 
     // Sort by date and time
@@ -257,10 +236,8 @@ class AppointmentsController extends GetxController {
 
   /// Clear all filters
   void clearFilters() {
-    selectedDate.value = null;
     selectedEmployeeId.value = null;
     selectedStatus.value = null;
-    searchQuery.value = '';
   }
 
   /// Toggle view mode
