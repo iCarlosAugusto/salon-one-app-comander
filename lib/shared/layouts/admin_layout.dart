@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salon_one_comander/data/services/session_service.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
@@ -119,6 +120,7 @@ class _Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
+    final sessionService = Get.find<SessionService>();
 
     return Container(
       width: isExpanded ? 256 : 72,
@@ -177,53 +179,63 @@ class _Sidebar extends StatelessWidget {
           const Divider(height: 1),
           // Navigation items
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(
-                vertical: AppConstants.spacingMd,
-                horizontal: isExpanded ? AppConstants.spacingSm : 0,
-              ),
-              children: [
-                _NavItem(
-                  icon: Icons.dashboard_outlined,
-                  selectedIcon: Icons.dashboard,
-                  label: 'Dashboard',
-                  route: Routes.dashboard,
-                  currentRoute: currentRoute,
-                  isExpanded: isExpanded,
-                ),
-                _NavItem(
-                  icon: Icons.calendar_today_outlined,
-                  selectedIcon: Icons.calendar_today,
-                  label: 'Appointments',
-                  route: Routes.appointments,
-                  currentRoute: currentRoute,
-                  isExpanded: isExpanded,
-                ),
-                _NavItem(
-                  icon: Icons.spa_outlined,
-                  selectedIcon: Icons.spa,
-                  label: 'Services',
-                  route: Routes.services,
-                  currentRoute: currentRoute,
-                  isExpanded: isExpanded,
-                ),
-                _NavItem(
-                  icon: Icons.people_outline,
-                  selectedIcon: Icons.people,
-                  label: 'Employees',
-                  route: Routes.employees,
-                  currentRoute: currentRoute,
-                  isExpanded: isExpanded,
-                ),
-                _NavItem(
-                  icon: Icons.settings_outlined,
-                  selectedIcon: Icons.settings,
-                  label: 'Settings',
-                  route: Routes.settings,
-                  currentRoute: currentRoute,
-                  isExpanded: isExpanded,
-                ),
-              ],
+            child: FutureBuilder(
+              future: sessionService.getUserData(),
+              builder: (context, snapshot) {
+                final isAdmin = snapshot.data?.isAdmin ?? false;
+
+                return ListView(
+                  padding: EdgeInsets.symmetric(
+                    vertical: AppConstants.spacingMd,
+                    horizontal: isExpanded ? AppConstants.spacingSm : 0,
+                  ),
+                  children: [
+                    _NavItem(
+                      icon: Icons.dashboard_outlined,
+                      selectedIcon: Icons.dashboard,
+                      label: 'Dashboard',
+                      route: Routes.dashboard,
+                      currentRoute: currentRoute,
+                      isExpanded: isExpanded,
+                    ),
+                    _NavItem(
+                      icon: Icons.calendar_today_outlined,
+                      selectedIcon: Icons.calendar_today,
+                      label: 'Appointments',
+                      route: Routes.appointments,
+                      currentRoute: currentRoute,
+                      isExpanded: isExpanded,
+                    ),
+                    // Admin-only items
+                    if (isAdmin) ...[
+                      _NavItem(
+                        icon: Icons.spa_outlined,
+                        selectedIcon: Icons.spa,
+                        label: 'Services',
+                        route: Routes.services,
+                        currentRoute: currentRoute,
+                        isExpanded: isExpanded,
+                      ),
+                      _NavItem(
+                        icon: Icons.people_outline,
+                        selectedIcon: Icons.people,
+                        label: 'Employees',
+                        route: Routes.employees,
+                        currentRoute: currentRoute,
+                        isExpanded: isExpanded,
+                      ),
+                      _NavItem(
+                        icon: Icons.settings_outlined,
+                        selectedIcon: Icons.settings,
+                        label: 'Settings',
+                        route: Routes.settings,
+                        currentRoute: currentRoute,
+                        isExpanded: isExpanded,
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -241,6 +253,7 @@ class _DrawerContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
+    final sessionService = Get.find<SessionService>();
 
     return SafeArea(
       child: Column(
@@ -294,47 +307,57 @@ class _DrawerContent extends StatelessWidget {
           const Divider(),
           // Navigation items
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(
-                vertical: AppConstants.spacingSm,
-              ),
-              children: [
-                _DrawerNavItem(
-                  icon: Icons.dashboard_outlined,
-                  selectedIcon: Icons.dashboard,
-                  label: 'Dashboard',
-                  route: Routes.dashboard,
-                  currentRoute: currentRoute,
-                ),
-                _DrawerNavItem(
-                  icon: Icons.calendar_today_outlined,
-                  selectedIcon: Icons.calendar_today,
-                  label: 'Appointments',
-                  route: Routes.appointments,
-                  currentRoute: currentRoute,
-                ),
-                _DrawerNavItem(
-                  icon: Icons.spa_outlined,
-                  selectedIcon: Icons.spa,
-                  label: 'Services',
-                  route: Routes.services,
-                  currentRoute: currentRoute,
-                ),
-                _DrawerNavItem(
-                  icon: Icons.people_outline,
-                  selectedIcon: Icons.people,
-                  label: 'Employees',
-                  route: Routes.employees,
-                  currentRoute: currentRoute,
-                ),
-                _DrawerNavItem(
-                  icon: Icons.settings_outlined,
-                  selectedIcon: Icons.settings,
-                  label: 'Settings',
-                  route: Routes.settings,
-                  currentRoute: currentRoute,
-                ),
-              ],
+            child: FutureBuilder(
+              future: sessionService.getUserData(),
+              builder: (context, snapshot) {
+                final isAdmin = snapshot.data?.isAdmin ?? false;
+
+                return ListView(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppConstants.spacingSm,
+                  ),
+                  children: [
+                    _DrawerNavItem(
+                      icon: Icons.dashboard_outlined,
+                      selectedIcon: Icons.dashboard,
+                      label: 'Dashboard',
+                      route: Routes.dashboard,
+                      currentRoute: currentRoute,
+                    ),
+                    _DrawerNavItem(
+                      icon: Icons.calendar_today_outlined,
+                      selectedIcon: Icons.calendar_today,
+                      label: 'Appointments',
+                      route: Routes.appointments,
+                      currentRoute: currentRoute,
+                    ),
+                    // Admin-only items
+                    if (isAdmin) ...[
+                      _DrawerNavItem(
+                        icon: Icons.spa_outlined,
+                        selectedIcon: Icons.spa,
+                        label: 'Services',
+                        route: Routes.services,
+                        currentRoute: currentRoute,
+                      ),
+                      _DrawerNavItem(
+                        icon: Icons.people_outline,
+                        selectedIcon: Icons.people,
+                        label: 'Employees',
+                        route: Routes.employees,
+                        currentRoute: currentRoute,
+                      ),
+                      _DrawerNavItem(
+                        icon: Icons.settings_outlined,
+                        selectedIcon: Icons.settings,
+                        label: 'Settings',
+                        route: Routes.settings,
+                        currentRoute: currentRoute,
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ],
