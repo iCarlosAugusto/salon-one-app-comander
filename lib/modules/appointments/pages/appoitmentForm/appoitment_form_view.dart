@@ -126,7 +126,7 @@ class AppoitmentFormView extends GetView<AppoitmentFormController> {
                     ShadButton(
                       onPressed: controller.isLoading.value
                           ? null
-                          : controller.submitForm,
+                          : () => controller.submitForm(dateSelected),
                       size: ShadButtonSize.lg,
                       child: controller.isLoading.value
                           ? const SizedBox(

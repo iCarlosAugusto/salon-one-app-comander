@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:salon_one_comander/data/models/create_appointment_dto.dart';
 import 'package:salon_one_comander/data/services/appointment_service.dart';
 import 'package:salon_one_comander/data/services/session_service.dart';
 import '../../../../data/models/service_model.dart';
@@ -124,33 +125,50 @@ class AppoitmentFormController extends GetxController {
     return isValid;
   }
 
-  Future<void> submitForm() async {
+  Future<void> submitForm(DateTime dateSelected) async {
     if (!validate()) return;
 
     isLoading.value = true;
 
     try {
-      // TODO: Call API to create appointment
-      final data = {
-        'clientName': customerNameController.text.trim(),
-        'clientPhone': customerPhoneController.text.trim(),
-        'startTime': selectedTime.value,
-        'services': selectedServices.map((s) => {'serviceId': s.id}).toList(),
-      };
+      final userSession = await sessionService.getUserData();
 
-      debugPrint('Submitting appointment: $data');
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      Get.back(result: true);
-      Get.snackbar(
-        'Success',
-        'Appointment created successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      // Create the appointment DTO
+      final appointmentDto = CreateAppointmentDto(
+        salonId: userSession!.salonId,
+        services: selectedServices
+            .map(
+              (s) => AppointmentServiceItem(
+                serviceId: s.id,
+                employeeId: userSession.id,
+              ),
+            )
+            .toList(),
+        appointmentDate: DateFormat('yyyy-MM-dd').format(dateSelected),
+        startTime: selectedTime.value!,
+        clientName: customerNameController.text.trim(),
+        clientPhone: customerPhoneController.text.trim(),
       );
+
+      debugPrint('Submitting appointment: ${appointmentDto.toJson()}');
+
+      // Call the API to create the appointment
+      final result = await appointmentService.createAppointment(
+        appointmentDto.toJson(),
+      );
+
+      if (result.data != null) {
+        Get.back(result: true);
+        Get.snackbar(
+          'Success',
+          'Appointment created successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        throw Exception(result.error ?? 'Failed to create appointment');
+      }
     } catch (e) {
       Get.snackbar(
         'Error',

@@ -41,10 +41,16 @@ class AppointmentsView extends GetView<AppointmentsController> {
             right: 16,
             bottom: 16,
             child: FloatingActionButton(
-              onPressed: () => Get.toNamed(
-                Routes.appointmentForm,
-                arguments: {'dateSelected': controller.calendarDate.value},
-              ),
+              onPressed: () async {
+                final result = await Get.toNamed(
+                  Routes.appointmentForm,
+                  arguments: {'dateSelected': controller.calendarDate.value},
+                );
+                // Refresh appointments if a new one was created
+                if (result == true) {
+                  controller.refresh();
+                }
+              },
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add, color: Colors.white),
             ),
@@ -341,7 +347,17 @@ class AppointmentsView extends GetView<AppointmentsController> {
                   ),
                   const SizedBox(width: AppConstants.spacingSm),
                   ShadButton(
-                    onPressed: () => Get.toNamed(Routes.appointmentForm),
+                    onPressed: () async {
+                      final result = await Get.toNamed(
+                        Routes.appointmentForm,
+                        arguments: {
+                          'dateSelected': controller.calendarDate.value,
+                        },
+                      );
+                      if (result == true) {
+                        controller.refresh();
+                      }
+                    },
                     size: ShadButtonSize.sm,
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
