@@ -22,10 +22,6 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
         backgroundColor: theme.colorScheme.background,
         foregroundColor: theme.colorScheme.foreground,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
-        ),
       ),
       body: Column(
         children: [
@@ -132,7 +128,7 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
                       final service = services[index];
                       return Obx(
                         () => ListTile(
-                          leading: Checkbox(
+                          leading: Checkbox.adaptive(
                             value: controller.isSelected(service.id),
                             onChanged: (value) {
                               controller.toggleService(service.id);
@@ -166,7 +162,6 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
     final selectedCount = controller.selectedServiceIds.length;
 
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingMd),
       decoration: BoxDecoration(
         color: theme.colorScheme.card,
         border: Border(top: BorderSide(color: theme.colorScheme.border)),
@@ -177,41 +172,27 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
             constraints: BoxConstraints(
               maxWidth: isDesktop ? 800 : double.infinity,
             ),
-            child: Row(
-              children: [
-                // Summary
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$selectedCount service${selectedCount != 1 ? 's' : ''} selected',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.foreground,
-                        ),
-                      ),
-                      if (selectedCount > 0)
-                        Text(
-                          '${controller.totalDuration} min • ${Formatters.formatCurrency(controller.totalPrice)}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.colorScheme.mutedForeground,
-                          ),
-                        ),
-                    ],
-                  ),
+            child: ListTile(
+              title: Text(
+                '$selectedCount service${selectedCount != 1 ? 's' : ''} selected',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.foreground,
                 ),
-
-                // Confirm button
-                ShadButton(
-                  onPressed: selectedCount > 0
-                      ? controller.confirmSelection
-                      : null,
-                  child: const Text('Confirm'),
+              ),
+              subtitle: Text(
+                '${controller.totalDuration} min • ${Formatters.formatCurrency(controller.totalPrice)}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.mutedForeground,
                 ),
-              ],
+              ),
+              trailing: ShadButton(
+                onPressed: selectedCount > 0
+                    ? controller.confirmSelection
+                    : null,
+                child: const Text('Confirm'),
+              ),
             ),
           ),
         ),
