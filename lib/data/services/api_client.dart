@@ -17,6 +17,8 @@ class ApiClient extends GetConnect {
           request.method.toLowerCase() == "patch") {
         request.headers['Content-Type'] = 'application/json';
         request.headers['Accept'] = 'application/json';
+      } else {
+        request.headers.remove('content-type');
       }
       // Get JWT from Supabase session
       final session = Supabase.instance.client.auth.currentSession;
