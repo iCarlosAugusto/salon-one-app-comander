@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salon_one_comander/shared/widgets/text_field_widget.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -52,46 +53,24 @@ class AppoitmentFormView extends GetView<AppoitmentFormController> {
                       ),
                       const SizedBox(height: AppConstants.spacingXl),
                     ],
-
-                    // Customer Name Field
-                    _buildLabel(context, 'Customer Name', isRequired: true),
-                    const SizedBox(height: AppConstants.spacingXs),
-                    ShadInput(
+                    TextFieldWidget(
                       controller: controller.customerNameController,
-                      placeholder: const Text('Enter customer name'),
+                      isRequired: true,
+                      label: 'Customer Name',
+                      errorText: controller.customerNameError.value,
                     ),
-                    if (controller.customerNameError.value != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        controller.customerNameError.value!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.destructive,
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: AppConstants.spacingMd),
 
                     // Customer Phone Field
-                    _buildLabel(context, 'Customer Phone', isRequired: true),
-                    const SizedBox(height: AppConstants.spacingXs),
-                    ShadInput(
+                    TextFieldWidgetVariants.phone(
+                      isRequired: true,
                       controller: controller.customerPhoneController,
-                      placeholder: const Text('Enter phone number'),
-                      keyboardType: TextInputType.phone,
+                      label: 'Customer Phone',
+                      errorText: controller.customerPhoneError.value,
                     ),
-                    if (controller.customerPhoneError.value != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        controller.customerPhoneError.value!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.destructive,
-                        ),
-                      ),
-                    ],
+                    const SizedBox(height: AppConstants.spacingMd),
+
                     // Services Selection
-                    _buildLabel(context, 'Services', isRequired: true),
                     const SizedBox(height: AppConstants.spacingXs),
                     Container(
                       decoration: BoxDecoration(
@@ -129,7 +108,6 @@ class AppoitmentFormView extends GetView<AppoitmentFormController> {
                     const SizedBox(height: AppConstants.spacingMd),
 
                     // Start Time Field
-                    _buildLabel(context, 'Appointment Time', isRequired: true),
                     const SizedBox(height: AppConstants.spacingXs),
                     _buildTimeSelector(context),
                     if (controller.startTimeError.value != null) ...[
@@ -168,29 +146,6 @@ class AppoitmentFormView extends GetView<AppoitmentFormController> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLabel(
-    BuildContext context,
-    String label, {
-    bool isRequired = false,
-  }) {
-    final theme = ShadTheme.of(context);
-
-    return Row(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: theme.colorScheme.foreground,
-          ),
-        ),
-        if (isRequired)
-          Text(' *', style: TextStyle(color: theme.colorScheme.destructive)),
-      ],
     );
   }
 

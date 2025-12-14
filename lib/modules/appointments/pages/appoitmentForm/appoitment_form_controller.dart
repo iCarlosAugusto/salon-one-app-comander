@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:salon_one_comander/data/services/appointment_service.dart';
-import 'package:salon_one_comander/data/services/auth_service.dart';
-import 'package:salon_one_comander/data/services/employee_service.dart';
 import 'package:salon_one_comander/data/services/session_service.dart';
 import '../../../../data/models/service_model.dart';
 import '../../../../shared/routes/app_routes.dart';
 
 class AppoitmentFormController extends GetxController {
   //Get current user logged in
-  final authService = Get.find<AuthService>();
   final sessionService = Get.find<SessionService>();
 
   //Services
