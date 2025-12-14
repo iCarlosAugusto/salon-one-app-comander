@@ -109,10 +109,6 @@ class AppointmentsView extends GetView<AppointmentsController> {
       appointments: appointments,
       getEmployeeName: controller.getEmployeeName,
       onAppointmentTap: (apt) => _showAppointmentDetails(context, apt),
-      onTimeSlotTap: (time) {
-        // Could open new appointment form with pre-filled time
-        Get.toNamed(Routes.appointmentForm);
-      },
     );
   }
 
@@ -346,28 +342,6 @@ class AppointmentsView extends GetView<AppointmentsController> {
                     ),
                   ),
                   const SizedBox(width: AppConstants.spacingSm),
-                  ShadButton(
-                    onPressed: () async {
-                      final result = await Get.toNamed(
-                        Routes.appointmentForm,
-                        arguments: {
-                          'dateSelected': controller.calendarDate.value,
-                        },
-                      );
-                      if (result == true) {
-                        controller.refresh();
-                      }
-                    },
-                    size: ShadButtonSize.sm,
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, size: 18),
-                        SizedBox(width: 4),
-                        Text('New'),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ],
@@ -387,21 +361,22 @@ class AppointmentsView extends GetView<AppointmentsController> {
       spacing: AppConstants.spacingSm,
       runSpacing: AppConstants.spacingSm,
       children: [
-        // Employee filter
-        Obx(
-          () => _FilterChip(
-            label: controller.selectedEmployeeId.value != null
-                ? controller.getEmployeeName(
-                    controller.selectedEmployeeId.value,
-                  )
-                : 'All employees',
-            isSelected: controller.selectedEmployeeId.value != null,
-            onTap: () => _showEmployeeFilter(context),
-            onClear: controller.selectedEmployeeId.value != null
-                ? () => controller.selectedEmployeeId.value = null
-                : null,
+        // Employee filter - only visible for admins
+        if (controller.isAdmin)
+          Obx(
+            () => _FilterChip(
+              label: controller.selectedEmployeeId.value != null
+                  ? controller.getEmployeeName(
+                      controller.selectedEmployeeId.value,
+                    )
+                  : 'All employees',
+              isSelected: controller.selectedEmployeeId.value != null,
+              onTap: () => _showEmployeeFilter(context),
+              onClear: controller.selectedEmployeeId.value != null
+                  ? () => controller.selectedEmployeeId.value = null
+                  : null,
+            ),
           ),
-        ),
         // Status filter
         Obx(
           () => _FilterChip(
@@ -421,6 +396,9 @@ class AppointmentsView extends GetView<AppointmentsController> {
   void _showEmployeeFilter(BuildContext context) {
     Get.bottomSheet(
       Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
         padding: const EdgeInsets.all(AppConstants.spacingMd),
         decoration: BoxDecoration(
           color: ShadTheme.of(context).colorScheme.card,
@@ -441,22 +419,30 @@ class AppointmentsView extends GetView<AppointmentsController> {
               ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
-            ...controller.employees.map(
-              (employee) => ListTile(
-                leading: UserAvatar(initials: employee.initials, size: 36),
-                title: Text(employee.fullName),
-                trailing: controller.selectedEmployeeId.value == employee.id
-                    ? const Icon(Icons.check, color: AppColors.primary)
-                    : null,
-                onTap: () {
-                  controller.selectedEmployeeId.value = employee.id;
-                  Get.back();
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.employees.length,
+                itemBuilder: (context, index) {
+                  final employee = controller.employees[index];
+                  return ListTile(
+                    leading: UserAvatar(initials: employee.initials, size: 36),
+                    title: Text(employee.fullName),
+                    trailing: controller.selectedEmployeeId.value == employee.id
+                        ? const Icon(Icons.check, color: AppColors.primary)
+                        : null,
+                    onTap: () {
+                      controller.selectedEmployeeId.value = employee.id;
+                      Get.back();
+                    },
+                  );
                 },
               ),
             ),
           ],
         ),
       ),
+      isScrollControlled: true,
     );
   }
 

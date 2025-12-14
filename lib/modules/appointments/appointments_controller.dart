@@ -3,17 +3,23 @@ import 'package:get/get.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/appointment_model.dart';
+import '../../data/models/auth_user.dart';
 import '../../data/models/employee_model.dart';
 import '../../data/models/service_model.dart';
 import '../../data/services/appointment_service.dart';
 import '../../data/services/employee_service.dart';
 import '../../data/services/service_service.dart';
+import '../../data/services/session_service.dart';
 
 /// Controller for appointments management
 class AppointmentsController extends GetxController {
   final _appointmentService = Get.find<AppointmentService>();
   final _employeeService = Get.find<EmployeeService>();
   final _serviceService = Get.find<ServiceService>();
+  final _sessionService = Get.find<SessionService>();
+
+  // Current user
+  final currentUser = Rxn<AuthUser>();
 
   // Loading states
   final isLoading = true.obs;
@@ -36,6 +42,9 @@ class AppointmentsController extends GetxController {
   final calendarDate = DateTime.now().obs;
 
   String get salonId => AppConstants.defaultSalonId;
+
+  /// Check if current user is admin
+  bool get isAdmin => currentUser.value?.isAdmin ?? false;
 
   // Filtered appointments
   List<AppointmentModel> get filteredAppointments {
@@ -100,6 +109,9 @@ class AppointmentsController extends GetxController {
     hasError.value = false;
 
     try {
+      // Load current user first
+      currentUser.value = await _sessionService.getUserData();
+
       await Future.wait([
         _loadAppointments(),
         _loadEmployees(),
