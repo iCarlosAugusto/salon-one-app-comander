@@ -12,9 +12,12 @@ class ApiClient extends GetConnect {
 
     // Add default headers with JWT authentication
     httpClient.addRequestModifier<dynamic>((request) {
-      request.headers['Content-Type'] = 'application/json';
-      request.headers['Accept'] = 'application/json';
-
+      if (request.method.toLowerCase() == "post" ||
+          request.method.toLowerCase() == "put" ||
+          request.method.toLowerCase() == "patch") {
+        request.headers['Content-Type'] = 'application/json';
+        request.headers['Accept'] = 'application/json';
+      }
       // Get JWT from Supabase session
       final session = Supabase.instance.client.auth.currentSession;
       if (session != null) {
@@ -111,7 +114,7 @@ class ApiClient extends GetConnect {
           contentType: 'application/json',
         );
       } else {
-        response = await delete<dynamic>(endpoint);
+        response = await httpClient.request(endpoint, "DELETE");
       }
       return _handleResponse(response, decoder);
     } catch (e) {

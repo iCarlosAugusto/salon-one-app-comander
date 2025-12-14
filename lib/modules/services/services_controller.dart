@@ -140,7 +140,7 @@ class ServicesController extends GetxController {
     isSaving.value = true;
     try {
       final response = await _serviceService.deleteService(id);
-      if (response.isSuccess) {
+      if (response.statusCode == 204) {
         services.removeWhere((s) => s.id == id);
         Get.snackbar(
           'Success',
