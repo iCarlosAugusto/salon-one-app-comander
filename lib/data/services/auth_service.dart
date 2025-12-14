@@ -185,16 +185,21 @@ class AuthService extends GetxService {
     try {
       // Fetch role and tenant info from your backend
       final apiClient = Get.find<ApiClient>();
-      final response = await apiClient.getRequest<Map<String, dynamic>>(
-        ApiEndpoints.authMe,
-        decoder: (data) => data as Map<String, dynamic>,
-      );
 
-      if (response.isSuccess && response.data != null) {
+      final result = await _supabase
+          .from('employees')
+          .select('*')
+          .eq('profile_id', supabaseUser.id)
+          .limit(1)
+          .maybeSingle();
+
+      if (result != null) {
         final authUser = AuthUser.fromJson({
-          'id': supabaseUser.id,
+          'id': result["id"],
           'email': supabaseUser.email ?? '',
-          ...response.data!,
+          "role": result["role"],
+          "salonId": result["salon_id"],
+          "displayName": "",
         });
 
         currentUser.value = authUser;
@@ -215,6 +220,7 @@ class AuthService extends GetxService {
         return basicUser;
       }
     } catch (e) {
+      print("Error during the login... $e");
       // Create basic user if backend call fails
       final basicUser = AuthUser(
         id: supabaseUser.id,

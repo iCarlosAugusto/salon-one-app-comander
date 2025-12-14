@@ -1,4 +1,8 @@
 import 'package:get/get.dart';
+import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/appoitment_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/appoitment_form_view.dart';
+import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_view.dart';
+import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_binding.dart';
 import 'app_routes.dart';
 import '../middlewares/auth_middleware.dart';
 import '../../modules/auth/login/login_view.dart';
@@ -55,8 +59,13 @@ class AppPages {
     ),
     GetPage(
       name: Routes.appointmentForm,
-      page: () => const AppointmentsView(),
-      binding: AppointmentsBinding(),
+      page: () => const AppoitmentFormView(),
+      binding: AppoitmentFormBinding(),
+    ),
+    GetPage(
+      name: Routes.serviceSelection,
+      page: () => const ServiceSelectionView(),
+      binding: ServiceSelectionBinding(),
     ),
 
     // Services

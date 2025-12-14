@@ -19,6 +19,7 @@ abstract class Routes {
   static const services = '/services';
   static const serviceForm = '/services/form';
   static const serviceEdit = '/services/:id/edit';
+  static const serviceSelection = '/serviceSelection'; // For appointment form
 
   // Employees
   static const employees = '/employees';

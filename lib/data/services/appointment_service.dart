@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:salon_one_comander/data/models/EmployeeAvailableSlots.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../models/appointment_model.dart';
 import 'api_client.dart';
@@ -99,12 +100,13 @@ class AppointmentService extends GetxService {
   }
 
   /// Get available time slots
-  Future<ApiResponse<List<Map<String, dynamic>>>> getAvailableSlots({
-    required String employeeIds,
-    required String serviceIds,
+  Future<ApiResponse<List<EmployeeAvailableSlots>>> getEmployeeAvailableSlots({
+    required List<String> employeeIds,
+    required List<String> serviceIds,
     required String date,
   }) async {
-    return _client.getRequest<List<Map<String, dynamic>>>(
+    print("Fazendo a requisicao...");
+    return _client.getRequest<List<EmployeeAvailableSlots>>(
       ApiEndpoints.availableSlots(
         employeeIds: employeeIds,
         serviceIds: serviceIds,
@@ -112,7 +114,7 @@ class AppointmentService extends GetxService {
       ),
       decoder: (data) {
         if (data is List) {
-          return data.map((e) => e as Map<String, dynamic>).toList();
+          return data.map((e) => EmployeeAvailableSlots.fromJson(e)).toList();
         }
         return [];
       },

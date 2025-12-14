@@ -41,7 +41,10 @@ class AppointmentsView extends GetView<AppointmentsController> {
             right: 16,
             bottom: 16,
             child: FloatingActionButton(
-              onPressed: () => Get.toNamed(Routes.appointmentForm),
+              onPressed: () => Get.toNamed(
+                Routes.appointmentForm,
+                arguments: {'dateSelected': controller.calendarDate.value},
+              ),
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add, color: Colors.white),
             ),
