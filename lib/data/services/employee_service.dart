@@ -113,7 +113,7 @@ class EmployeeService extends GetxService {
     List<String> serviceIds,
   ) async {
     return _client.postRequest<List<ServiceModel>>(
-      ApiEndpoints.employeeServices(employeeId),
+      ApiEndpoints.assignService(employeeId),
       body: {'serviceIds': serviceIds},
       decoder: (data) {
         if (data is List) {
@@ -131,8 +131,8 @@ class EmployeeService extends GetxService {
     String employeeId,
     List<String> serviceIds,
   ) async {
-    return _client.deleteRequest<void>(
-      ApiEndpoints.employeeServices(employeeId),
+    return _client.postRequest<void>(
+      ApiEndpoints.unassignService(employeeId),
       body: {'serviceIds': serviceIds},
     );
   }

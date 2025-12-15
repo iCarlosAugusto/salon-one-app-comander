@@ -19,8 +19,15 @@ class ApiEndpoints {
   static String employeeById(String id) => '/employees/$id';
   static String employeesBySalon(String salonId) =>
       '/employees?salonId=$salonId';
+
   static String employeeServices(String employeeId) =>
       '/employees/$employeeId/services';
+
+  static String assignService(String employeeId) =>
+      '/employees/$employeeId/services/assign';
+
+  static String unassignService(String employeeId) =>
+      '/employees/$employeeId/services/unassign';
   static String employeeSchedules(String employeeId) =>
       '/employees/$employeeId/schedules';
 

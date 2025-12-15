@@ -121,7 +121,7 @@ class EmployeeDetailController extends GetxController {
           employeeId,
           toAdd,
         );
-        if (!addResponse.isSuccess) {
+        if (addResponse.statusCode == 200 || addResponse.statusCode == 204) {
           success = false;
           Get.snackbar(
             'Error',
@@ -137,7 +137,8 @@ class EmployeeDetailController extends GetxController {
           employeeId,
           toRemove,
         );
-        if (!removeResponse.isSuccess) {
+        if (removeResponse.statusCode == 200 ||
+            removeResponse.statusCode == 204) {
           success = false;
           Get.snackbar(
             'Error',
