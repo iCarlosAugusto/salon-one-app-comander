@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salon_one_comander/shared/widgets/generic_list_view.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_colors.dart';
@@ -7,7 +8,6 @@ import '../../core/utils/responsive.dart';
 import '../../core/utils/formatters.dart';
 import '../../shared/layouts/admin_layout.dart';
 import '../../shared/routes/app_routes.dart';
-import '../../shared/widgets/page_components.dart';
 import '../../shared/widgets/common_widgets.dart';
 import '../../data/models/service_model.dart';
 import 'services_controller.dart';
@@ -49,39 +49,24 @@ class ServicesView extends GetView<ServicesController> {
             _buildHeader(context),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const LoadingState(message: 'Loading services...');
-                }
-
-                if (controller.hasError.value) {
-                  return ErrorState(
-                    message: controller.errorMessage.value,
-                    onRetry: controller.refresh,
-                  );
-                }
-
-                final services = controller.filteredServices;
-
-                if (services.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.spa,
-                    title: 'No services found',
-                    message: controller.services.isEmpty
-                        ? 'Add your first service to get started'
-                        : 'Try adjusting your search',
-                    action: controller.services.isEmpty
-                        ? controller.createNewService
-                        : () => controller.searchQuery.value = '',
-                    actionLabel: controller.services.isEmpty
-                        ? 'Add Service'
-                        : 'Clear Search',
-                  );
-                }
-
-                return RefreshIndicator(
+                return GenericListView(
+                  items: controller.filteredServices,
                   onRefresh: controller.refresh,
-                  color: AppColors.primary,
-                  child: _buildServicesGrid(context, services),
+                  emptyIcon: Icons.spa,
+                  isLoading: controller.isLoading.value,
+                  onRetry: controller.refresh,
+                  hasError: controller.hasError.value,
+                  emptyTitle: 'No services found',
+                  emptyMessage: 'Add your first service to get started',
+                  emptyAction: controller.createNewService,
+                  emptyActionLabel: 'Add Service',
+                  itemBuilder: (context, service, index) => _ServiceCard(
+                    service: service,
+                    onEdit: () => controller.editService(service),
+                    onToggleStatus: () =>
+                        controller.toggleServiceStatus(service),
+                    onDelete: () => _showDeleteDialog(context, service),
+                  ),
                 );
               }),
             ),
@@ -148,35 +133,10 @@ class ServicesView extends GetView<ServicesController> {
             width: Responsive.isDesktop(context) ? 300 : double.infinity,
             child: ShadInput(
               placeholder: const Text('Search services...'),
-              // prefix: const Padding(
-              //   padding: EdgeInsets.only(left: 8),
-              //   child: Icon(Icons.search, size: 18),
-              // ),
               onChanged: (value) => controller.searchQuery.value = value,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildServicesGrid(BuildContext context, List<ServiceModel> services) {
-    return SingleChildScrollView(
-      padding: Responsive.padding(context),
-      child: ResponsiveGrid(
-        mobileColumns: 1,
-        tabletColumns: 2,
-        desktopColumns: 3,
-        children: services
-            .map(
-              (service) => _ServiceCard(
-                service: service,
-                onEdit: () => controller.editService(service),
-                onToggleStatus: () => controller.toggleServiceStatus(service),
-                onDelete: () => _showDeleteDialog(context, service),
-              ),
-            )
-            .toList(),
       ),
     );
   }
@@ -212,118 +172,17 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
     return ShadCard(
       padding: const EdgeInsets.all(AppConstants.spacingMd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: service.isActive
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : theme.colorScheme.muted,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-                ),
-                child: Icon(
-                  Icons.spa,
-                  color: service.isActive
-                      ? AppColors.primary
-                      : theme.colorScheme.mutedForeground,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            service.name,
-                            style: TextStyle(
-                              color: theme.colorScheme.foreground,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        if (!service.isActive)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.muted,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Inactive',
-                              style: TextStyle(
-                                color: theme.colorScheme.mutedForeground,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (service.description != null) ...[
-                      const SizedBox(height: AppConstants.spacingXs),
-                      Text(
-                        service.description!,
-                        style: TextStyle(
-                          color: theme.colorScheme.mutedForeground,
-                          fontSize: 13,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingMd),
-          Row(
-            children: [
-              Icon(
-                Icons.attach_money,
-                size: 16,
-                color: theme.colorScheme.mutedForeground,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                Formatters.formatCurrency(service.price),
-                style: TextStyle(
-                  color: theme.colorScheme.foreground,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingMd),
-              Icon(
-                Icons.schedule,
-                size: 16,
-                color: theme.colorScheme.mutedForeground,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                Formatters.formatDuration(service.duration),
-                style: TextStyle(
-                  color: theme.colorScheme.mutedForeground,
-                  fontSize: 13,
-                ),
-              ),
-            ],
+          ListTile(
+            leading: Icon(Icons.spa),
+            title: Text(service.name),
+            subtitle: Text(
+              "${Formatters.formatDuration(service.duration)} - ${Formatters.formatCurrency(service.price)}",
+            ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           const Divider(height: 1),
@@ -505,11 +364,6 @@ class _ServiceFormViewState extends State<_ServiceFormView> {
                             ShadInput(
                               controller: _priceController,
                               placeholder: const Text('0.00'),
-
-                              // prefix: const Padding(
-                              //   padding: EdgeInsets.only(left: 8),
-                              //   child: Text('R\$'),
-                              // ),
                               keyboardType: TextInputType.number,
                             ),
                           ],
