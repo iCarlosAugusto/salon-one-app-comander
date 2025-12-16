@@ -1,12 +1,11 @@
 import 'package:get/get.dart';
+import 'package:salon_one_comander/data/services/employee_service.dart';
 import '../../../../data/models/service_model.dart';
-import '../../../../data/services/service_service.dart';
 import '../../../../data/services/session_service.dart';
-import '../../../../core/constants/app_constants.dart';
 
 /// Controller for service selection screen
 class ServiceSelectionController extends GetxController {
-  final _serviceService = Get.find<ServiceService>();
+  final _employeeService = Get.find<EmployeeService>();
   final _sessionService = Get.find<SessionService>();
 
   // Loading state
@@ -69,9 +68,10 @@ class ServiceSelectionController extends GetxController {
 
     try {
       final userData = await _sessionService.getUserData();
-      final salonId = userData?.salonId ?? AppConstants.defaultSalonId;
 
-      final response = await _serviceService.getServices(salonId);
+      final response = await _employeeService.getEmployeeServices(
+        userData?.id ?? '',
+      );
 
       if (response.isSuccess && response.data != null) {
         // Only show active services

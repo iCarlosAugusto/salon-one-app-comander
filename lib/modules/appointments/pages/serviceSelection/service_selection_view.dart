@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salon_one_comander/shared/widgets/generic_list_view.dart';
+import 'package:salon_one_comander/shared/widgets/text_field_widget.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/formatters.dart';
 import 'service_selection_controller.dart';
@@ -33,40 +34,9 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
                 constraints: BoxConstraints(
                   maxWidth: isDesktop ? 800 : double.infinity,
                 ),
-                child: TextField(
+                child: TextFieldWidget(
                   onChanged: controller.updateSearch,
-                  decoration: InputDecoration(
-                    hintText: 'Search services...',
-                    prefixIcon: Icon(
-                      Icons.search,
-                      size: 18,
-                      color: theme.colorScheme.mutedForeground,
-                    ),
-                    filled: true,
-                    fillColor: theme.colorScheme.card,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.radiusSm,
-                      ),
-                      borderSide: BorderSide(color: theme.colorScheme.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.radiusSm,
-                      ),
-                      borderSide: BorderSide(color: theme.colorScheme.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.radiusSm,
-                      ),
-                      borderSide: BorderSide(color: AppColors.primary),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.spacingMd,
-                      vertical: AppConstants.spacingSm,
-                    ),
-                  ),
+                  placeholder: 'Procure pelo serviço',
                 ),
               ),
             ),
@@ -74,71 +44,33 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
           // Services list
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.hasError.value) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: theme.colorScheme.destructive,
-                      ),
-                      const SizedBox(height: AppConstants.spacingMd),
-                      Text(
-                        controller.errorMessage.value,
-                        style: TextStyle(color: theme.colorScheme.foreground),
-                      ),
-                      const SizedBox(height: AppConstants.spacingMd),
-                      ShadButton(
-                        onPressed: controller.loadServices,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final services = controller.filteredServices;
-
-              if (services.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No services found',
-                    style: TextStyle(color: theme.colorScheme.mutedForeground),
-                  ),
-                );
-              }
-
               return Center(
                 child: Container(
                   constraints: BoxConstraints(
                     maxWidth: isDesktop ? 800 : double.infinity,
                   ),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.spacingMd,
-                    ),
-                    itemCount: services.length,
-                    itemBuilder: (context, index) {
-                      final service = services[index];
+                  child: GenericListView(
+                    isLoading: controller.isLoading.value,
+                    items: controller.availableServices,
+                    emptyTitle: "Nenhum serviço vinculado a você",
+                    emptyMessage:
+                        "Peça para o gerente da barbearia vincular os serviços que deseja.",
+                    hasError: controller.hasError.value,
+                    onRetry: controller.loadServices,
+                    onRefresh: controller.loadServices,
+                    itemBuilder: (context, item, index) {
                       return Obx(
                         () => ListTile(
+                          onTap: () => controller.toggleService(item.id),
                           leading: Checkbox.adaptive(
-                            value: controller.isSelected(service.id),
+                            value: controller.isSelected(item.id),
                             onChanged: (value) {
-                              controller.toggleService(service.id);
+                              controller.toggleService(item.id);
                             },
                           ),
-                          onTap: () => controller.toggleService(service.id),
-                          selected: controller.isSelected(service.id),
-                          title: Text(service.name),
+                          title: Text(item.name),
                           subtitle: Text(
-                            "${service.duration} min - R\$ ${service.price}",
+                            "${item.duration} min - R\$ ${item.price}",
                           ),
                         ),
                       );
@@ -174,7 +106,7 @@ class ServiceSelectionView extends GetView<ServiceSelectionController> {
             ),
             child: ListTile(
               title: Text(
-                '$selectedCount service${selectedCount != 1 ? 's' : ''} selected',
+                '$selectedCount serviços${selectedCount != 1 ? 's' : ''}',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.foreground,
