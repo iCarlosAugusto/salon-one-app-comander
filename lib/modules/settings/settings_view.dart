@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/theme/app_text_theme.dart';
 import '../../core/utils/responsive.dart';
 import '../../shared/layouts/admin_layout.dart';
 import '../../shared/routes/app_routes.dart';
 import '../../shared/widgets/page_components.dart';
 import '../../data/models/salon_model.dart';
+import '../../data/models/operating_hour.dart';
 import 'settings_controller.dart';
 
 /// Settings view with profile and booking configuration
@@ -30,22 +31,11 @@ class SettingsView extends GetView<SettingsController> {
           );
         }
 
-        // Show appropriate section
-        switch (controller.currentSection.value) {
-          case SettingsSection.profile:
-            return _ProfileSection(
-              salon: controller.salon.value!,
-              onSave: controller.updateProfile,
-              isSaving: controller.isSaving.value,
-            );
-          case SettingsSection.booking:
-            return _BookingSettingsSection(
-              salon: controller.salon.value!,
-              onSave: controller.updateBookingSettings,
-              isSaving: controller.isSaving.value,
-              onBack: controller.goBack,
-            );
-        }
+        return _ProfileSection(
+          salon: controller.salon.value!,
+          onSave: controller.updateProfile,
+          isSaving: controller.isSaving.value,
+        );
       }),
     );
   }
@@ -78,6 +68,9 @@ class _ProfileSectionState extends State<_ProfileSection> {
   late final TextEditingController _zipCodeController;
   late final TextEditingController _websiteController;
 
+  // Operating hours state
+  late List<OperatingHour> _operatingHours;
+
   @override
   void initState() {
     super.initState();
@@ -99,6 +92,11 @@ class _ProfileSectionState extends State<_ProfileSection> {
     _websiteController = TextEditingController(
       text: widget.salon.website ?? '',
     );
+
+    // Initialize operating hours from salon or use defaults
+    _operatingHours = widget.salon.operatingHours.isNotEmpty
+        ? List.from(widget.salon.operatingHours)
+        : OperatingHour.defaultHours();
   }
 
   @override
@@ -116,7 +114,19 @@ class _ProfileSectionState extends State<_ProfileSection> {
     super.dispose();
   }
 
+  void _updateOperatingHour(int index, OperatingHour hour) {
+    setState(() {
+      _operatingHours[index] = hour;
+    });
+  }
+
   void _handleSave() {
+    // Filter only open days and convert to API format
+    final operatingHoursData = _operatingHours
+        .where((h) => h.isOpen)
+        .map((h) => h.toJson())
+        .toList();
+
     widget.onSave({
       'name': _nameController.text.trim(),
       'slug': _slugController.text.trim(),
@@ -144,53 +154,22 @@ class _ProfileSectionState extends State<_ProfileSection> {
       'website': _websiteController.text.trim().isEmpty
           ? null
           : _websiteController.text.trim(),
+      'operatingHours': operatingHoursData,
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-    final controller = Get.find<SettingsController>();
-
     return SingleChildScrollView(
       padding: Responsive.padding(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Settings',
-            style: TextStyle(
-              color: theme.colorScheme.foreground,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text('Barbershop Settings', style: context.appTextTheme.pageTitle),
           const SizedBox(height: AppConstants.spacingXs),
           Text(
             'Manage your barbershop settings',
-            style: TextStyle(color: theme.colorScheme.mutedForeground),
-          ),
-          const SizedBox(height: AppConstants.spacingLg),
-
-          // Quick access cards
-          ResponsiveGrid(
-            mobileColumns: 1,
-            tabletColumns: 2,
-            desktopColumns: 2,
-            children: [
-              _SettingsCard(
-                icon: Icons.store,
-                title: 'Business Profile',
-                description: 'Update your shop name, contact info, and address',
-                isActive: true,
-              ),
-              _SettingsCard(
-                icon: Icons.calendar_month,
-                title: 'Booking Settings',
-                description: 'Configure online booking options',
-                onTap: () => controller.goToSection(SettingsSection.booking),
-              ),
-            ],
+            style: context.appTextTheme.cardSubtitle,
           ),
           const SizedBox(height: AppConstants.spacingLg),
 
@@ -198,161 +177,204 @@ class _ProfileSectionState extends State<_ProfileSection> {
           Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 800),
-              child: ShadCard(
-                padding: const EdgeInsets.all(AppConstants.spacingLg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Business Profile',
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+              child: Column(
+                children: [
+                  // Business Profile Card
+                  ShadCard(
+                    padding: const EdgeInsets.all(AppConstants.spacingLg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Business Profile',
+                          style: context.appTextTheme.sectionTitle,
+                        ),
+                        const SizedBox(height: AppConstants.spacingLg),
+
+                        // Basic info
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _FormField(
+                                label: 'Business Name',
+                                controller: _nameController,
+                                placeholder: 'Your Barbershop',
+                              ),
+                            ),
+                            const SizedBox(width: AppConstants.spacingMd),
+                            Expanded(
+                              child: _FormField(
+                                label: 'URL Slug',
+                                controller: _slugController,
+                                placeholder: 'your-barbershop',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppConstants.spacingMd),
+                        _FormField(
+                          label: 'Description',
+                          controller: _descriptionController,
+                          placeholder: 'Tell customers about your business...',
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: AppConstants.spacingLg),
+                        const Divider(),
+                        const SizedBox(height: AppConstants.spacingLg),
+
+                        // Contact info
+                        Text(
+                          'Contact Information',
+                          style: context.appTextTheme.sectionTitle,
+                        ),
+                        const SizedBox(height: AppConstants.spacingMd),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _FormField(
+                                label: 'Email',
+                                controller: _emailController,
+                                placeholder: 'contact@yourbarbershop.com',
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                            ),
+                            const SizedBox(width: AppConstants.spacingMd),
+                            Expanded(
+                              child: _FormField(
+                                label: 'Phone',
+                                controller: _phoneController,
+                                placeholder: '(00) 00000-0000',
+                                keyboardType: TextInputType.phone,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppConstants.spacingMd),
+                        _FormField(
+                          label: 'Website',
+                          controller: _websiteController,
+                          placeholder: 'https://yourbarbershop.com',
+                          keyboardType: TextInputType.url,
+                        ),
+                        const SizedBox(height: AppConstants.spacingLg),
+                        const Divider(),
+                        const SizedBox(height: AppConstants.spacingLg),
+
+                        // Address
+                        Text(
+                          'Address',
+                          style: context.appTextTheme.sectionTitle,
+                        ),
+                        const SizedBox(height: AppConstants.spacingMd),
+                        _FormField(
+                          label: 'Street Address',
+                          controller: _addressController,
+                          placeholder: '123 Main Street',
+                        ),
+                        const SizedBox(height: AppConstants.spacingMd),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: _FormField(
+                                label: 'City',
+                                controller: _cityController,
+                                placeholder: 'City',
+                              ),
+                            ),
+                            const SizedBox(width: AppConstants.spacingMd),
+                            Expanded(
+                              child: _FormField(
+                                label: 'State',
+                                controller: _stateController,
+                                placeholder: 'State',
+                              ),
+                            ),
+                            const SizedBox(width: AppConstants.spacingMd),
+                            Expanded(
+                              child: _FormField(
+                                label: 'ZIP Code',
+                                controller: _zipCodeController,
+                                placeholder: '00000-000',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: AppConstants.spacingLg),
+
+                  // Operating Hours Card
+                  ShadCard(
+                    padding: const EdgeInsets.all(AppConstants.spacingLg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Operating Hours',
+                          style: context.appTextTheme.sectionTitle,
+                        ),
+                        const SizedBox(height: AppConstants.spacingXs),
+                        Text(
+                          'Set your business hours for each day of the week',
+                          style: context.appTextTheme.helper,
+                        ),
+                        const SizedBox(height: AppConstants.spacingLg),
+
+                        // Operating hours list
+                        ...List.generate(7, (index) {
+                          final hour = _operatingHours.firstWhere(
+                            (h) => h.dayOfWeek == index,
+                            orElse: () => OperatingHour(
+                              dayOfWeek: index,
+                              startTime: '08:00',
+                              endTime: '18:00',
+                              isOpen: false,
+                            ),
+                          );
+                          final hourIndex = _operatingHours.indexWhere(
+                            (h) => h.dayOfWeek == index,
+                          );
+
+                          return _OperatingHourRow(
+                            hour: hour,
+                            onChanged: (updated) {
+                              if (hourIndex >= 0) {
+                                _updateOperatingHour(hourIndex, updated);
+                              }
+                            },
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: AppConstants.spacingLg),
+
+                  // Save button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ShadButton(
+                        onPressed: widget.isSaving ? null : _handleSave,
+                        child: widget.isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Save Changes'),
                       ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
+                    ],
+                  ),
 
-                    // Basic info
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _FormField(
-                            label: 'Business Name',
-                            controller: _nameController,
-                            placeholder: 'Your Barbershop',
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingMd),
-                        Expanded(
-                          child: _FormField(
-                            label: 'URL Slug',
-                            controller: _slugController,
-                            placeholder: 'your-barbershop',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _FormField(
-                      label: 'Description',
-                      controller: _descriptionController,
-                      placeholder: 'Tell customers about your business...',
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
-                    const Divider(),
-                    const SizedBox(height: AppConstants.spacingLg),
-
-                    // Contact info
-                    Text(
-                      'Contact Information',
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _FormField(
-                            label: 'Email',
-                            controller: _emailController,
-                            placeholder: 'contact@yourbarbershop.com',
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingMd),
-                        Expanded(
-                          child: _FormField(
-                            label: 'Phone',
-                            controller: _phoneController,
-                            placeholder: '(00) 00000-0000',
-                            keyboardType: TextInputType.phone,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _FormField(
-                      label: 'Website',
-                      controller: _websiteController,
-                      placeholder: 'https://yourbarbershop.com',
-                      keyboardType: TextInputType.url,
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
-                    const Divider(),
-                    const SizedBox(height: AppConstants.spacingLg),
-
-                    // Address
-                    Text(
-                      'Address',
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _FormField(
-                      label: 'Street Address',
-                      controller: _addressController,
-                      placeholder: '123 Main Street',
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: _FormField(
-                            label: 'City',
-                            controller: _cityController,
-                            placeholder: 'City',
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingMd),
-                        Expanded(
-                          child: _FormField(
-                            label: 'State',
-                            controller: _stateController,
-                            placeholder: 'State',
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingMd),
-                        Expanded(
-                          child: _FormField(
-                            label: 'ZIP Code',
-                            controller: _zipCodeController,
-                            placeholder: '00000-000',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
-
-                    // Save button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ShadButton(
-                          onPressed: widget.isSaving ? null : _handleSave,
-                          child: widget.isSaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Save Changes'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  const SizedBox(height: AppConstants.spacingXl),
+                ],
               ),
             ),
           ),
@@ -362,278 +384,147 @@ class _ProfileSectionState extends State<_ProfileSection> {
   }
 }
 
-class _BookingSettingsSection extends StatefulWidget {
-  const _BookingSettingsSection({
-    required this.salon,
-    required this.onSave,
-    required this.isSaving,
-    required this.onBack,
-  });
+/// A row for editing a single day's operating hours
+class _OperatingHourRow extends StatelessWidget {
+  const _OperatingHourRow({required this.hour, required this.onChanged});
 
-  final SalonModel salon;
-  final Function(Map<String, dynamic>) onSave;
-  final bool isSaving;
-  final VoidCallback onBack;
-
-  @override
-  State<_BookingSettingsSection> createState() =>
-      _BookingSettingsSectionState();
-}
-
-class _BookingSettingsSectionState extends State<_BookingSettingsSection> {
-  late bool _allowOnlineBooking;
-  late bool _requireBookingApproval;
-  late final TextEditingController _slotIntervalController;
-  late final TextEditingController _maxAdvanceDaysController;
-  late final TextEditingController _minAdvanceHoursController;
-
-  @override
-  void initState() {
-    super.initState();
-    _allowOnlineBooking = widget.salon.allowOnlineBooking;
-    _requireBookingApproval = widget.salon.requireBookingApproval;
-    _slotIntervalController = TextEditingController(
-      text: widget.salon.defaultSlotInterval.toString(),
-    );
-    _maxAdvanceDaysController = TextEditingController(
-      text: widget.salon.maxAdvanceBookingDays.toString(),
-    );
-    _minAdvanceHoursController = TextEditingController(
-      text: widget.salon.minAdvanceBookingHours.toString(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _slotIntervalController.dispose();
-    _maxAdvanceDaysController.dispose();
-    _minAdvanceHoursController.dispose();
-    super.dispose();
-  }
-
-  void _handleSave() {
-    widget.onSave({
-      'allowOnlineBooking': _allowOnlineBooking,
-      'requireBookingApproval': _requireBookingApproval,
-      'defaultSlotInterval': int.tryParse(_slotIntervalController.text) ?? 10,
-      'maxAdvanceBookingDays':
-          int.tryParse(_maxAdvanceDaysController.text) ?? 90,
-      'minAdvanceBookingHours':
-          int.tryParse(_minAdvanceHoursController.text) ?? 2,
-    });
-  }
+  final OperatingHour hour;
+  final ValueChanged<OperatingHour> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
 
-    return SingleChildScrollView(
-      padding: Responsive.padding(context),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: widget.onBack,
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                  const SizedBox(width: AppConstants.spacingSm),
-                  Text(
-                    'Booking Settings',
-                    style: TextStyle(
-                      color: theme.colorScheme.foreground,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppConstants.spacingLg),
-              ShadCard(
-                padding: const EdgeInsets.all(AppConstants.spacingLg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Online Booking',
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _ToggleSetting(
-                      title: 'Allow Online Booking',
-                      description: 'Let customers book appointments online',
-                      value: _allowOnlineBooking,
-                      onChanged: (value) =>
-                          setState(() => _allowOnlineBooking = value),
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _ToggleSetting(
-                      title: 'Require Approval',
-                      description: 'Manually approve each booking request',
-                      value: _requireBookingApproval,
-                      onChanged: (value) =>
-                          setState(() => _requireBookingApproval = value),
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
-                    const Divider(),
-                    const SizedBox(height: AppConstants.spacingLg),
-                    Text(
-                      'Time Settings',
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    _FormField(
-                      label: 'Time Slot Interval (minutes)',
-                      controller: _slotIntervalController,
-                      placeholder: '10',
-                      keyboardType: TextInputType.number,
-                      helperText: 'How often to show available time slots',
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _FormField(
-                            label: 'Max Advance Days',
-                            controller: _maxAdvanceDaysController,
-                            placeholder: '90',
-                            keyboardType: TextInputType.number,
-                            helperText: 'How far ahead customers can book',
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingMd),
-                        Expanded(
-                          child: _FormField(
-                            label: 'Min Advance Hours',
-                            controller: _minAdvanceHoursController,
-                            placeholder: '2',
-                            keyboardType: TextInputType.number,
-                            helperText: 'Minimum notice required',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingLg),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ShadButton.outline(
-                          onPressed: widget.onBack,
-                          child: const Text('Cancel'),
-                        ),
-                        const SizedBox(width: AppConstants.spacingSm),
-                        ShadButton(
-                          onPressed: widget.isSaving ? null : _handleSave,
-                          child: widget.isSaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Save Changes'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppConstants.spacingXs),
+      child: Row(
+        children: [
+          // Day toggle
+          SizedBox(
+            width: 44,
+            child: ShadSwitch(
+              value: hour.isOpen,
+              onChanged: (value) {
+                onChanged(hour.copyWith(isOpen: value));
+              },
+            ),
           ),
-        ),
+          const SizedBox(width: AppConstants.spacingSm),
+
+          // Day name
+          SizedBox(
+            width: 100,
+            child: Text(
+              hour.dayName,
+              style: TextStyle(
+                color: hour.isOpen
+                    ? theme.colorScheme.foreground
+                    : theme.colorScheme.mutedForeground,
+                fontWeight: hour.isOpen ? FontWeight.w500 : FontWeight.normal,
+              ),
+            ),
+          ),
+
+          // Time pickers (only shown if open)
+          if (hour.isOpen) ...[
+            const SizedBox(width: AppConstants.spacingMd),
+            _TimeDropdown(
+              value: hour.startTime,
+              onChanged: (value) {
+                onChanged(hour.copyWith(startTime: value));
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingSm,
+              ),
+              child: Text(
+                'to',
+                style: TextStyle(color: theme.colorScheme.mutedForeground),
+              ),
+            ),
+            _TimeDropdown(
+              value: hour.endTime,
+              onChanged: (value) {
+                onChanged(hour.copyWith(endTime: value));
+              },
+            ),
+          ] else ...[
+            const SizedBox(width: AppConstants.spacingMd),
+            Text(
+              'Closed',
+              style: TextStyle(
+                color: theme.colorScheme.mutedForeground,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    this.onTap,
-    this.isActive = false,
-  });
+/// Time dropdown selector
+class _TimeDropdown extends StatelessWidget {
+  const _TimeDropdown({required this.value, required this.onChanged});
 
-  final IconData icon;
-  final String title;
-  final String description;
-  final VoidCallback? onTap;
-  final bool isActive;
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  static const List<String> _times = [
+    '06:00',
+    '06:30',
+    '07:00',
+    '07:30',
+    '08:00',
+    '08:30',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
+    '17:30',
+    '18:00',
+    '18:30',
+    '19:00',
+    '19:30',
+    '20:00',
+    '20:30',
+    '21:00',
+    '21:30',
+    '22:00',
+    '22:30',
+    '23:00',
+    '23:30',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-        child: ShadCard(
-          padding: const EdgeInsets.all(AppConstants.spacingMd),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppConstants.spacingSm),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : theme.colorScheme.muted,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-                ),
-                child: Icon(
-                  icon,
-                  color: isActive
-                      ? AppColors.primary
-                      : theme.colorScheme.mutedForeground,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: theme.colorScheme.foreground,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: theme.colorScheme.mutedForeground,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (onTap != null)
-                Icon(
-                  Icons.chevron_right,
-                  color: theme.colorScheme.mutedForeground,
-                ),
-            ],
-          ),
-        ),
-      ),
+    return ShadSelect<String>(
+      placeholder: const Text('Select time'),
+      selectedOptionBuilder: (context, value) => Text(value),
+      options: _times.map((time) {
+        return ShadOption(value: time, child: Text(time));
+      }).toList(),
+      onChanged: (newValue) {
+        if (newValue != null) {
+          onChanged(newValue);
+        }
+      },
+      initialValue: value,
     );
   }
 }
@@ -645,7 +536,6 @@ class _FormField extends StatelessWidget {
     this.placeholder,
     this.maxLines,
     this.keyboardType,
-    this.helperText,
   });
 
   final String label;
@@ -653,7 +543,6 @@ class _FormField extends StatelessWidget {
   final String? placeholder;
   final int? maxLines;
   final TextInputType? keyboardType;
-  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -677,62 +566,6 @@ class _FormField extends StatelessWidget {
           maxLines: maxLines,
           keyboardType: keyboardType,
         ),
-        if (helperText != null) ...[
-          const SizedBox(height: AppConstants.spacingXs),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: theme.colorScheme.mutedForeground,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _ToggleSetting extends StatelessWidget {
-  const _ToggleSetting({
-    required this.title,
-    required this.description,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String title;
-  final String description;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: theme.colorScheme.foreground,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                description,
-                style: TextStyle(
-                  color: theme.colorScheme.mutedForeground,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-        ShadSwitch(value: value, onChanged: onChanged),
       ],
     );
   }

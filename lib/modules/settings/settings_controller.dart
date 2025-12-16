@@ -110,6 +110,7 @@ class SettingsController extends GetxController {
   }
 
   /// Refresh data
+  @override
   Future<void> refresh() => loadSalon();
 }
 

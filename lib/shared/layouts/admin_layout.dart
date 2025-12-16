@@ -105,7 +105,7 @@ class _MobileLayout extends StatelessWidget {
         backgroundColor: theme.colorScheme.card,
         child: _DrawerContent(currentRoute: currentRoute),
       ),
-      body: child,
+      body: Padding(padding: const EdgeInsets.all(16.0), child: child),
     );
   }
 }

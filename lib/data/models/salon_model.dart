@@ -1,3 +1,5 @@
+import 'operating_hour.dart';
+
 /// Salon model representing a barbershop/salon
 class SalonModel {
   final String id;
@@ -22,6 +24,7 @@ class SalonModel {
   final int maxAdvanceBookingDays;
   final int minAdvanceBookingHours;
   final bool isActive;
+  final List<OperatingHour> operatingHours;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -48,6 +51,7 @@ class SalonModel {
     this.maxAdvanceBookingDays = 90,
     this.minAdvanceBookingHours = 2,
     this.isActive = true,
+    this.operatingHours = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -76,6 +80,11 @@ class SalonModel {
       maxAdvanceBookingDays: json['maxAdvanceBookingDays'] as int? ?? 90,
       minAdvanceBookingHours: json['minAdvanceBookingHours'] as int? ?? 2,
       isActive: json['isActive'] as bool? ?? true,
+      operatingHours:
+          (json['operatingHours'] as List<dynamic>?)
+              ?.map((e) => OperatingHour.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -105,6 +114,7 @@ class SalonModel {
       'maxAdvanceBookingDays': maxAdvanceBookingDays,
       'minAdvanceBookingHours': minAdvanceBookingHours,
       'isActive': isActive,
+      'operatingHours': operatingHours.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -131,6 +141,7 @@ class SalonModel {
     int? maxAdvanceBookingDays,
     int? minAdvanceBookingHours,
     bool? isActive,
+    List<OperatingHour>? operatingHours,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -160,8 +171,18 @@ class SalonModel {
       minAdvanceBookingHours:
           minAdvanceBookingHours ?? this.minAdvanceBookingHours,
       isActive: isActive ?? this.isActive,
+      operatingHours: operatingHours ?? this.operatingHours,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  /// Get operating hours for a specific day, or null if not set
+  OperatingHour? getHoursForDay(int dayOfWeek) {
+    try {
+      return operatingHours.firstWhere((h) => h.dayOfWeek == dayOfWeek);
+    } catch (_) {
+      return null;
+    }
   }
 }

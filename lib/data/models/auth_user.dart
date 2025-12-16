@@ -5,6 +5,7 @@ class AuthUser {
   final UserRole role;
   final String salonId;
   final String? displayName;
+  final String? phone;
 
   const AuthUser({
     required this.id,
@@ -12,6 +13,7 @@ class AuthUser {
     required this.role,
     required this.salonId,
     this.displayName,
+    this.phone,
   });
 
   /// Create from Supabase user data combined with backend role data
@@ -23,6 +25,7 @@ class AuthUser {
       salonId: json['salonId'] as String? ?? json['salon_id'] as String? ?? '',
       displayName:
           json['displayName'] as String? ?? json['display_name'] as String?,
+      phone: json['phone'] as String?,
     );
   }
 
@@ -33,7 +36,27 @@ class AuthUser {
       'role': role.value,
       'salonId': salonId,
       'displayName': displayName,
+      'phone': phone,
     };
+  }
+
+  /// Copy with modified fields
+  AuthUser copyWith({
+    String? id,
+    String? email,
+    UserRole? role,
+    String? salonId,
+    String? displayName,
+    String? phone,
+  }) {
+    return AuthUser(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      salonId: salonId ?? this.salonId,
+      displayName: displayName ?? this.displayName,
+      phone: phone ?? this.phone,
+    );
   }
 
   /// Check if user has admin privileges

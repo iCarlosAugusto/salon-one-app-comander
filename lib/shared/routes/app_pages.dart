@@ -3,6 +3,10 @@ import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/app
 import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/appoitment_form_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_binding.dart';
+import 'package:salon_one_comander/modules/settings/settings_list/settings_list.dart';
+import 'package:salon_one_comander/modules/settings/settings_list/settings_list_binding.dart';
+import 'package:salon_one_comander/modules/settings/profile/profile_settings_view.dart';
+import 'package:salon_one_comander/modules/settings/profile/profile_settings_binding.dart';
 import 'app_routes.dart';
 import '../middlewares/auth_middleware.dart';
 import '../../modules/auth/login/login_view.dart';
@@ -105,8 +109,13 @@ class AppPages {
     // Settings
     GetPage(
       name: Routes.settings,
-      page: () => const SettingsView(),
-      binding: SettingsBinding(),
+      page: () => const SettingsList(),
+      binding: SettingsListBinding(),
+    ),
+    GetPage(
+      name: Routes.profileSettings,
+      page: () => const ProfileSettingsView(),
+      binding: ProfileSettingsBinding(),
     ),
     GetPage(
       name: Routes.salonProfile,

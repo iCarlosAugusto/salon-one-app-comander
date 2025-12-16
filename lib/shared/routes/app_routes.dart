@@ -30,7 +30,8 @@ abstract class Routes {
 
   // Settings
   static const settings = '/settings';
-  static const salonProfile = '/settings/profile';
+  static const profileSettings = '/settings/profile';
+  static const salonProfile = '/settings/barbershop';
   static const bookingSettings = '/settings/booking';
 
   // Helper methods for dynamic routes
