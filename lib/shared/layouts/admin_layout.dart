@@ -13,32 +13,52 @@ class AdminLayout extends StatelessWidget {
     super.key,
     required this.child,
     required this.currentRoute,
+    this.floatingActionButton,
   });
 
   final Widget child;
   final String currentRoute;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(
-      mobile: _MobileLayout(currentRoute: currentRoute, child: child),
-      tablet: _TabletLayout(currentRoute: currentRoute, child: child),
-      desktop: _DesktopLayout(currentRoute: currentRoute, child: child),
+      mobile: _MobileLayout(
+        currentRoute: currentRoute,
+        child: child,
+        floatingActionButton: floatingActionButton,
+      ),
+      tablet: _TabletLayout(
+        currentRoute: currentRoute,
+        child: child,
+        floatingActionButton: floatingActionButton,
+      ),
+      desktop: _DesktopLayout(
+        currentRoute: currentRoute,
+        child: child,
+        floatingActionButton: floatingActionButton,
+      ),
     );
   }
 }
 
 /// Desktop layout with expanded sidebar
 class _DesktopLayout extends StatelessWidget {
-  const _DesktopLayout({required this.child, required this.currentRoute});
+  const _DesktopLayout({
+    required this.child,
+    required this.currentRoute,
+    this.floatingActionButton,
+  });
 
   final Widget child;
   final String currentRoute;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ShadTheme.of(context).colorScheme.background,
+      floatingActionButton: floatingActionButton,
       body: Row(
         children: [
           _Sidebar(currentRoute: currentRoute, isExpanded: true),
@@ -51,15 +71,21 @@ class _DesktopLayout extends StatelessWidget {
 
 /// Tablet layout with collapsed sidebar
 class _TabletLayout extends StatelessWidget {
-  const _TabletLayout({required this.child, required this.currentRoute});
+  const _TabletLayout({
+    required this.child,
+    required this.currentRoute,
+    this.floatingActionButton,
+  });
 
   final Widget child;
   final String currentRoute;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ShadTheme.of(context).colorScheme.background,
+      floatingActionButton: floatingActionButton,
       body: Row(
         children: [
           _Sidebar(currentRoute: currentRoute, isExpanded: false),
@@ -72,10 +98,15 @@ class _TabletLayout extends StatelessWidget {
 
 /// Mobile layout with drawer
 class _MobileLayout extends StatelessWidget {
-  const _MobileLayout({required this.child, required this.currentRoute});
+  const _MobileLayout({
+    required this.child,
+    required this.currentRoute,
+    this.floatingActionButton,
+  });
 
   final Widget child;
   final String currentRoute;
+  final Widget? floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +114,7 @@ class _MobileLayout extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
+      floatingActionButton: floatingActionButton,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.card,
         elevation: 0,

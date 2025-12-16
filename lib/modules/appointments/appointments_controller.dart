@@ -93,13 +93,15 @@ class AppointmentsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Default to calendar view
+    viewMode.value = AppointmentViewMode.calendar;
+
+    // Load initial data (employees, services, and appointments for today)
     loadData();
 
     // Listen for calendar date changes and fetch appointments
     ever(calendarDate, (_) {
-      if (viewMode.value == AppointmentViewMode.calendar) {
-        _loadAppointmentsForDate(calendarDate.value);
-      }
+      _loadAppointmentsForDate(calendarDate.value);
     });
   }
 
@@ -304,6 +306,7 @@ class AppointmentsController extends GetxController {
   }
 
   /// Refresh data
+  @override
   Future<void> refresh() => loadData();
 }
 

@@ -10,12 +10,16 @@ class Formatters {
   static final _displayDateTimeFormat = DateFormat('dd MMM yyyy HH:mm');
   static final _timeFormat = DateFormat('HH:mm');
   static final _dayOfWeekFormat = DateFormat('EEEE');
+  static final _fullDateFormat = DateFormat('EEEE, d MMMM yyyy');
 
   /// Format date for API (yyyy-MM-dd)
   static String formatDateForApi(DateTime date) => _dateFormat.format(date);
 
   /// Format date for display (dd MMM yyyy)
   static String formatDate(DateTime date) => _displayDateFormat.format(date);
+
+  /// Format date with full day name (Monday, 1 January 2024)
+  static String formatDateFull(DateTime date) => _fullDateFormat.format(date);
 
   /// Format date and time for display
   static String formatDateTime(DateTime dateTime) =>
@@ -35,6 +39,22 @@ class Formatters {
 
   /// Get day of week name
   static String getDayOfWeek(DateTime date) => _dayOfWeekFormat.format(date);
+
+  /// Format relative date (Yesterday, Tomorrow, or date)
+  static String formatRelativeDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
+    final difference = targetDate.difference(today).inDays;
+
+    if (difference == 0) return 'Today';
+    if (difference == 1) return 'Tomorrow';
+    if (difference == -1) return 'Yesterday';
+    if (difference > 0 && difference <= 7) return 'In $difference days';
+    if (difference < 0 && difference >= -7) return '${-difference} days ago';
+
+    return formatDate(date);
+  }
 
   /// Get day of week name from index (0 = Sunday)
   static String getDayOfWeekFromIndex(int index) {
