@@ -21,6 +21,7 @@ class AppoitmentFormController extends GetxController {
   // Form state
   final selectedTime = Rxn<String>();
   final isLoading = false.obs;
+  final isLoadingTimeSlots = false.obs;
 
   // Selected services
   final selectedServices = <ServiceModel>[].obs;
@@ -70,20 +71,34 @@ class AppoitmentFormController extends GetxController {
   }
 
   Future<void> fetchTimeSlots(DateTime date) async {
-    final userSession = await sessionService.getUserData();
-    final dateFormatted = DateFormat('yyyy-MM-dd').format(date);
+    isLoadingTimeSlots.value = true;
 
-    final serviceIds = selectedServices.map((s) => s.id).toList();
+    try {
+      final userSession = await sessionService.getUserData();
+      final dateFormatted = DateFormat('yyyy-MM-dd').format(date);
 
-    final result = await appointmentService.getEmployeeAvailableSlots(
-      employeeIds: [userSession!.id],
-      serviceIds: serviceIds,
-      date: dateFormatted,
-    );
+      final serviceIds = selectedServices.map((s) => s.id).toList();
 
-    if (result.data != null && result.data!.isNotEmpty) {
-      final employee = result.data!.first;
-      availableTimes.value = employee.availableSlots;
+      final result = await appointmentService.getEmployeeAvailableSlots(
+        employeeIds: [userSession!.id],
+        serviceIds: serviceIds,
+        date: dateFormatted,
+      );
+
+      if (result.data != null && result.data!.isNotEmpty) {
+        final employee = result.data!.first;
+        availableTimes.value = employee.availableSlots;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Ops, algo de errado aconteceu :(',
+        "Tente novamente mais tarde.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoadingTimeSlots.value = false;
     }
   }
 
