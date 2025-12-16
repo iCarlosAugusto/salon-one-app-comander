@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'core/bindings/initial_binding.dart';
 import 'core/constants/supabase_config.dart';
 import 'core/theme/app_theme.dart';
@@ -11,6 +12,9 @@ import 'shared/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone data (required for Syncfusion Calendar)
+  tz.initializeTimeZones();
 
   // Load environment variables
   await dotenv.load(fileName: '.env');
