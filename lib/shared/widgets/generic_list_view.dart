@@ -27,6 +27,7 @@ class GenericListView<T> extends StatelessWidget {
     this.mobileBreakpoint = 600,
     this.desktopItemWidth = 350,
     this.desktopSpacing = 16,
+    this.shrinkWrap = false,
   });
 
   /// The list of items to display
@@ -78,6 +79,10 @@ class GenericListView<T> extends StatelessWidget {
 
   /// Spacing between items on desktop grid
   final double desktopSpacing;
+
+  /// If true, the ListView will size itself to its content.
+  /// Useful when embedding inside another scrollable widget.
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +222,8 @@ class GenericListView<T> extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemCount: items.length,
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       itemBuilder: (context, index) =>
           itemBuilder(context, items[index], index),
     );
