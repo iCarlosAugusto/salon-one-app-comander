@@ -213,8 +213,9 @@ class GenericListView<T> extends StatelessWidget {
 
   /// Single-column list for mobile
   Widget _buildMobileList(BuildContext context) {
-    return ListView.builder(
+    return ListView.separated(
       padding: padding ?? const EdgeInsets.all(16),
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemCount: items.length,
       itemBuilder: (context, index) =>
           itemBuilder(context, items[index], index),
