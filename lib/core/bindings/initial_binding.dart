@@ -6,6 +6,8 @@ import '../../data/services/salon_service.dart';
 import '../../data/services/employee_service.dart';
 import '../../data/services/service_service.dart';
 import '../../data/services/appointment_service.dart';
+import '../../data/services/local_notification_service.dart';
+import '../../data/services/firebase_messaging_service.dart';
 
 /// Initial bindings for dependency injection
 class InitialBinding extends Bindings {
@@ -17,6 +19,10 @@ class InitialBinding extends Bindings {
 
     // API Client
     Get.put(ApiClient(), permanent: true);
+
+    // Notification Services - for push notifications
+    Get.put(LocalNotificationsService(), permanent: true);
+    Get.put(FirebaseMessagingService(), permanent: true);
 
     // Domain Services
     Get.lazyPut(() => SalonService(), fenix: true);

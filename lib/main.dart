@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -9,9 +10,12 @@ import 'core/constants/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/routes/app_pages.dart';
 import 'shared/routes/app_routes.dart';
+import 'data/services/local_notification_service.dart';
+import 'data/services/firebase_messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   // Initialize timezone data (required for Syncfusion Calendar)
   tz.initializeTimeZones();
@@ -25,8 +29,12 @@ void main() async {
     anonKey: SupabaseConfig.anonKey,
   );
 
-  // Initialize bindings
+  // Initialize bindings (registers all GetX services)
   InitialBinding().dependencies();
+
+  // Initialize notification services after bindings are registered
+  await Get.find<LocalNotificationsService>().init();
+  await Get.find<FirebaseMessagingService>().init();
 
   // Determine initial route based on session
   final hasSession = Supabase.instance.client.auth.currentSession != null;
