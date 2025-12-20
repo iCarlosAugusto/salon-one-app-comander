@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import '../models/notification_payload.dart';
 import 'local_notification_service.dart';
+import 'notification_navigation_service.dart';
 
 /// Background message handler - must be a top-level function
 @pragma('vm:entry-point')
@@ -20,7 +24,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// - FCM initialization and token management
 /// - Foreground notification display via LocalNotificationsService
 /// - Background and terminated state notifications
-/// - Notification tap handling
+/// - Notification tap handling with deep link navigation
 class FirebaseMessagingService extends GetxService {
   /// Current FCM token (observable)
   final RxnString fcmToken = RxnString(null);
@@ -56,7 +60,10 @@ class FirebaseMessagingService extends GetxService {
     // Check for initial message that opened the app from terminated state
     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      _onMessageOpenedApp(initialMessage);
+      // Delay slightly to ensure navigation is ready
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _onMessageOpenedApp(initialMessage);
+      });
     }
 
     debugPrint('FirebaseMessagingService initialized');
@@ -109,11 +116,13 @@ class FirebaseMessagingService extends GetxService {
     debugPrint('Foreground message received: ${message.data.toString()}');
     final notificationData = message.notification;
     if (notificationData != null) {
-      // Display a local notification using the service
+      // Pass the data payload as JSON for local notification tap handling
+      final payloadJson = json.encode(message.data);
+
       _localNotificationsService.showNotification(
         notificationData.title,
         notificationData.body,
-        message.data.toString(),
+        payloadJson,
       );
     }
   }
@@ -121,12 +130,17 @@ class FirebaseMessagingService extends GetxService {
   /// Handles notification taps when app is opened from background or terminated state
   void _onMessageOpenedApp(RemoteMessage message) {
     debugPrint('Notification opened app: ${message.data.toString()}');
-    // TODO: Add navigation based on message data
-    // Example: Navigate to appointment details if appointmentId is in data
-    // final appointmentId = message.data['appointmentId'];
-    // if (appointmentId != null) {
-    //   Get.toNamed(Routes.appointmentDetails, arguments: {'id': appointmentId});
-    // }
+
+    // Parse the payload
+    final payload = NotificationPayload.fromMap(message.data);
+
+    // Navigate using the navigation service
+    try {
+      final navigationService = Get.find<NotificationNavigationService>();
+      navigationService.navigateFromNotification(payload);
+    } catch (e) {
+      debugPrint('Navigation service not found: $e');
+    }
   }
 
   /// Get current FCM token for server registration

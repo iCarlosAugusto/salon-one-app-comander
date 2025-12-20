@@ -96,7 +96,19 @@ class AppointmentsController extends GetxController {
     // Default to calendar view
     viewMode.value = AppointmentViewMode.calendar;
 
-    // Load initial data (employees, services, and appointments for today)
+    // Check for initial date from navigation arguments (deep link from notification)
+    final args = Get.arguments;
+    if (args != null && args is Map && args['initialDate'] != null) {
+      final initialDate = args['initialDate'];
+      if (initialDate is DateTime) {
+        calendarDate.value = initialDate;
+        debugPrint(
+          'AppointmentsController: Set initial date from notification: $initialDate',
+        );
+      }
+    }
+
+    // Load initial data (employees, services, and appointments for today/initial date)
     loadData();
 
     // Listen for calendar date changes and fetch appointments

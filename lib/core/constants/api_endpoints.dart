@@ -4,7 +4,7 @@ class ApiEndpoints {
 
   // Base URL - Configure this based on your environment
   // TODO: Replace with your actual API base URL
-  static const String baseUrl = 'http://127.0.0.1:3001';
+  static const String baseUrl = 'http://127.0.0.1:8080';
 
   // Auth endpoints
   static const String authMe = '/auth/me';

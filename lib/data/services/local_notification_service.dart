@@ -1,13 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import '../models/notification_payload.dart';
+import 'notification_navigation_service.dart';
 
 /// Service for handling local notifications display
 ///
 /// Handles:
 /// - Local notification initialization and configuration
 /// - Displaying notifications when app is in foreground
-/// - Notification tap handling
+/// - Notification tap handling with deep link navigation
 class LocalNotificationsService extends GetxService {
   /// Main plugin instance for handling notifications
   late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
@@ -72,11 +74,20 @@ class LocalNotificationsService extends GetxService {
     debugPrint('LocalNotificationsService initialized');
   }
 
-  /// Handle notification tap callback
+  /// Handle notification tap callback - navigate to appointments
   void _onNotificationTap(NotificationResponse response) {
-    debugPrint('Notification tapped: ${response.payload}');
-    // TODO: Add navigation based on payload
-    // Example: Parse payload JSON and navigate to appointment details
+    debugPrint('Local notification tapped: ${response.payload}');
+
+    // Parse payload from JSON string
+    final payload = NotificationPayload.fromJsonString(response.payload);
+
+    // Navigate using the navigation service
+    try {
+      final navigationService = Get.find<NotificationNavigationService>();
+      navigationService.navigateFromNotification(payload);
+    } catch (e) {
+      debugPrint('Navigation service not found: $e');
+    }
   }
 
   /// Show a local notification with the given title, body, and payload
