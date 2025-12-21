@@ -5,7 +5,6 @@ import '../../../core/theme/app_text_theme.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../shared/layouts/admin_layout.dart';
 import '../../../shared/routes/app_routes.dart';
-import '../../../shared/widgets/settings_list_item.dart';
 import 'settings_list_controller.dart';
 
 /// Settings list screen displaying navigation options
@@ -39,16 +38,14 @@ class SettingsList extends GetView<SettingsListController> {
                 const SizedBox(height: AppConstants.spacingXl),
 
                 // Account section
-                SettingsSection(
-                  title: 'Account',
-                  children: [
-                    SettingsListItem(
-                      icon: Icons.person_outline,
-                      title: 'Profile Settings',
-                      subtitle: 'Your personal information',
-                      onTap: () => Get.toNamed(Routes.profileSettings),
-                    ),
-                  ],
+                ListTile(
+                  title: const Text(
+                    'Account',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  leading: Icon(Icons.person_outline),
+                  subtitle: const Text('Your personal information'),
+                  onTap: () => Get.toNamed(Routes.profileSettings),
                 ),
 
                 // Business section (admin only)
@@ -61,30 +58,26 @@ class SettingsList extends GetView<SettingsListController> {
                     return const SizedBox.shrink();
                   }
 
-                  return SettingsSection(
-                    title: 'Business',
-                    children: [
-                      SettingsListItem(
-                        icon: Icons.store_outlined,
-                        title: 'Barbershop Settings',
-                        subtitle: 'Business profile and information',
-                        onTap: () => Get.toNamed(Routes.salonProfile),
-                      ),
-                    ],
+                  return ListTile(
+                    title: const Text(
+                      'Business',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    leading: Icon(Icons.store_outlined),
+                    subtitle: const Text('Business profile and information'),
+                    onTap: () => Get.toNamed(Routes.salonProfile),
                   );
                 }),
 
                 // Support section
-                SettingsSection(
-                  title: 'Support',
-                  children: [
-                    SettingsListItem(
-                      icon: Icons.help_outline,
-                      title: 'Help & Support',
-                      subtitle: 'Contact our team',
-                      onTap: controller.launchSupport,
-                    ),
-                  ],
+                ListTile(
+                  title: const Text(
+                    'Support',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  leading: Icon(Icons.help_outline),
+                  subtitle: const Text('Contact our team'),
+                  onTap: controller.launchSupport,
                 ),
               ],
             ),
