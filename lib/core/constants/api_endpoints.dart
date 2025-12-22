@@ -43,6 +43,7 @@ class ApiEndpoints {
   static String appointmentById(String id) => '/appointments/$id';
   static String appointmentStatus(String id) => '/appointments/$id/status';
   static String cancelAppointment(String id) => '/appointments/$id/cancel';
+  static String appointmentServices(String id) => '/appointments/$id/services';
 
   // Availability endpoints
   static String availableSlots({

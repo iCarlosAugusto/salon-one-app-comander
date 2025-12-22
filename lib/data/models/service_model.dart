@@ -1,35 +1,31 @@
 /// Service model representing a service offered by the salon
 class ServiceModel {
   final String id;
-  final String salonId;
+  final String? salonId;
   final String name;
-  final String? description;
   final double price;
   final int duration; // in minutes
   final String? category;
   final String? imageUrl;
+  final String? description;
   final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
 
   ServiceModel({
     required this.id,
-    required this.salonId,
+    this.salonId,
     required this.name,
-    this.description,
     required this.price,
     required this.duration,
+    this.description,
     this.category,
     this.imageUrl,
     this.isActive = true,
-    required this.createdAt,
-    required this.updatedAt,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
     return ServiceModel(
       id: json['id'] as String,
-      salonId: json['salonId'] as String,
+      salonId: json['salonId'] as String?,
       name: json['name'] as String,
       description: json['description'] as String?,
       price: _parsePrice(json['price']),
@@ -37,8 +33,6 @@ class ServiceModel {
       category: json['category'] as String?,
       imageUrl: json['imageUrl'] as String?,
       isActive: json['isActive'] as bool? ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
 
@@ -74,8 +68,6 @@ class ServiceModel {
     String? category,
     String? imageUrl,
     bool? isActive,
-    DateTime? createdAt,
-    DateTime? updatedAt,
   }) {
     return ServiceModel(
       id: id ?? this.id,
@@ -87,8 +79,6 @@ class ServiceModel {
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
       isActive: isActive ?? this.isActive,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:salon_one_comander/data/models/EmployeeAvailableSlots.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../models/appointment_model.dart';
+import '../models/appointment_service_item.dart';
 import 'api_client.dart';
 
 /// Service for appointment-related API operations
@@ -96,6 +97,26 @@ class AppointmentService extends GetxService {
       body: reason != null ? {'reason': reason} : null,
       decoder: (data) =>
           AppointmentModel.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  /// Get services for a specific appointment
+  Future<ApiResponse<List<AppointmentServiceItem>>> getAppointmentServices(
+    String appointmentId,
+  ) async {
+    return _client.getRequest<List<AppointmentServiceItem>>(
+      ApiEndpoints.appointmentServices(appointmentId),
+      decoder: (data) {
+        if (data is List) {
+          return data
+              .map(
+                (e) =>
+                    AppointmentServiceItem.fromJson(e as Map<String, dynamic>),
+              )
+              .toList();
+        }
+        return [];
+      },
     );
   }
 

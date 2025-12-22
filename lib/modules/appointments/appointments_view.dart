@@ -120,26 +120,10 @@ class _CalendarBodyState extends State<CalendarBody> {
   }
 
   void _showAppointmentDetails(AppointmentModel appointment) {
-    final theme = ShadTheme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.colorScheme.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => AppointmentDetailsSheet(
-        appointment: appointment,
-        employeeName: widget.controller.getEmployeeName(appointment.employeeId),
-        onStatusChange: (status) async {
-          Navigator.pop(context);
-          await widget.controller.updateStatus(appointment.id, status);
-        },
-        onCancel: () async {
-          Navigator.pop(context);
-          await widget.controller.cancelAppointment(appointment.id);
-        },
-      ),
+    // Navigate to appointment details
+    Get.toNamed(
+      Routes.appointmentDetail,
+      arguments: {'appointment': appointment},
     );
   }
 
