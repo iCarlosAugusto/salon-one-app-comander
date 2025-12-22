@@ -3,6 +3,8 @@ import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/app
 import 'package:salon_one_comander/modules/appointments/pages/appoitmentForm/appoitment_form_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/appoitmentDetails/appointment_details_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/appoitmentDetails/appointment_details_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/discount/discount_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/discount/discount_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_binding.dart';
 import 'package:salon_one_comander/modules/settings/settings_list/settings_list.dart';
@@ -133,6 +135,11 @@ class AppPages {
       name: Routes.bookingSettings,
       page: () => const SettingsView(),
       binding: SettingsBinding(),
+    ),
+    GetPage(
+      name: Routes.discount,
+      page: () => const DiscountView(),
+      binding: DiscountBinding(),
     ),
   ];
 }

@@ -200,7 +200,6 @@ class AppointmentDetailsController extends GetxController {
 
   /// Checkout appointment
   void checkout() {
-    // TODO: Implement checkout functionality
-    Get.snackbar('Info', 'Funcionalidade em desenvolvimento');
+    Get.toNamed(Routes.discount, arguments: {'appointment': appointment.value});
   }
 }

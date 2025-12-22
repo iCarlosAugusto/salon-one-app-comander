@@ -15,6 +15,9 @@ abstract class Routes {
   static const appointmentForm = '/appointments/form';
   static const appointmentEdit = '/appointments/:id/edit';
 
+  // Discount
+  static const discount = '/discount';
+
   // Services
   static const services = '/services';
   static const serviceForm = '/services/form';
