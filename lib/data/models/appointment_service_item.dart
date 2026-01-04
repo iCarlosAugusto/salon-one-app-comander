@@ -1,21 +1,19 @@
+import 'package:salon_one_comander/data/models/service_model.dart';
+
 /// Model for a service item within an appointment
 ///
 /// Used when fetching services for a specific appointment from
 /// GET /appointments/:id (returns list of services with employee info)
-class AppointmentServiceItem {
-  final String id;
-  final String name;
-  final double price;
-  final int duration;
+class AppointmentServiceItem extends ServiceModel {
   final String startTime;
   final String endTime;
   final AppointmentServiceEmployee? employee;
 
   AppointmentServiceItem({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.duration,
+    required super.id,
+    required super.name,
+    required super.price,
+    required super.duration,
     required this.startTime,
     required this.endTime,
     this.employee,
@@ -34,26 +32,6 @@ class AppointmentServiceItem {
               json['employee'] as Map<String, dynamic>,
             )
           : null,
-    );
-  }
-
-  AppointmentServiceItem copyWith({
-    String? id,
-    String? name,
-    double? price,
-    int? duration,
-    String? startTime,
-    String? endTime,
-    AppointmentServiceEmployee? employee,
-  }) {
-    return AppointmentServiceItem(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      price: price ?? this.price,
-      duration: duration ?? this.duration,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      employee: employee ?? this.employee,
     );
   }
 

@@ -18,6 +18,15 @@ abstract class Routes {
   // Discount
   static const discount = '/discount';
 
+  // Payment Type
+  static const paymentType = '/paymentType';
+
+  // Split Payment
+  static const splitPayment = '/splitPayment';
+
+  // Payment Feedback
+  static const paymentFeedback = '/paymentFeedback';
+
   // Services
   static const services = '/services';
   static const serviceForm = '/services/form';

@@ -5,6 +5,12 @@ import 'package:salon_one_comander/modules/appointments/pages/appoitmentDetails/
 import 'package:salon_one_comander/modules/appointments/pages/appoitmentDetails/appointment_details_binding.dart';
 import 'package:salon_one_comander/modules/appointments/pages/discount/discount_binding.dart';
 import 'package:salon_one_comander/modules/appointments/pages/discount/discount_view.dart';
+import 'package:salon_one_comander/modules/appointments/pages/paymentType/payment_type_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/paymentType/payment_type_view.dart';
+import 'package:salon_one_comander/modules/appointments/pages/splitPayment/split_payment_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/splitPayment/split_payment_view.dart';
+import 'package:salon_one_comander/modules/appointments/pages/feedback/feedback_binding.dart';
+import 'package:salon_one_comander/modules/appointments/pages/feedback/feedback_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_view.dart';
 import 'package:salon_one_comander/modules/appointments/pages/serviceSelection/service_selection_binding.dart';
 import 'package:salon_one_comander/modules/settings/settings_list/settings_list.dart';
@@ -140,6 +146,21 @@ class AppPages {
       name: Routes.discount,
       page: () => const DiscountView(),
       binding: DiscountBinding(),
+    ),
+    GetPage(
+      name: Routes.paymentType,
+      page: () => const PaymentTypeView(),
+      binding: PaymentTypeBinding(),
+    ),
+    GetPage(
+      name: Routes.splitPayment,
+      page: () => const SplitPaymentView(),
+      binding: SplitPaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.paymentFeedback,
+      page: () => const FeedbackView(),
+      binding: FeedbackBinding(),
     ),
   ];
 }

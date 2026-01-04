@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salon_one_comander/data/models/appoinment_checkout_model.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/appointment_model.dart';
 import 'appointment_details_controller.dart';
@@ -18,7 +19,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
         ),
       ),
       body: Obx(() {
-        final apt = controller.appointment.value;
+        final apt = controller.appoimentCheckout.value;
         if (apt == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -60,7 +61,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
   }
 
   /// Client info card with name, email, actions
-  Widget _buildClientCard(BuildContext context, AppointmentModel apt) {
+  Widget _buildClientCard(BuildContext context, AppoimentCheckoutModel apt) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -72,7 +73,9 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
           radius: 28,
           backgroundColor: const Color(0xFF6366F1),
           child: Text(
-            apt.clientName.isNotEmpty ? apt.clientName[0].toUpperCase() : '?',
+            apt.appointmentModel.clientName.isNotEmpty
+                ? apt.appointmentModel.clientName[0].toUpperCase()
+                : '?',
             style: const TextStyle(
               fontSize: 24,
               color: Colors.white,
@@ -80,8 +83,10 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
             ),
           ),
         ),
-        title: Text(apt.clientName),
-        subtitle: Text(apt.clientEmail ?? apt.clientPhone),
+        title: Text(apt.appointmentModel.clientName),
+        subtitle: Text(
+          apt.appointmentModel.clientEmail ?? apt.appointmentModel.clientPhone,
+        ),
       ),
     );
   }
@@ -155,7 +160,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (controller.appointmentServices.isEmpty) {
+          if (controller.appoimentCheckout.value?.services.isEmpty ?? true) {
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -170,25 +175,29 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
           }
 
           return Column(
-            children: controller.appointmentServices.map((service) {
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: BorderSide(
-                      color: _getGradientColor(service.id.hashCode),
-                      width: 3,
+            children:
+                [
+                  ...controller.appoimentCheckout.value!.services,
+                  ...controller.appoimentCheckout.value!.newServicesAdded,
+                ].map((service) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: _getGradientColor(service.id.hashCode),
+                          width: 3,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                child: ListTile(
-                  title: Text(service.name),
-                  subtitle: Text(
-                    '${service.formattedStartTime} · ${service.formattedEndTime}',
-                  ),
-                  trailing: Text('R\$ ${service.price.toStringAsFixed(0)}'),
-                ),
-              );
-            }).toList(),
+                    child: ListTile(
+                      title: Text(service.name),
+                      subtitle: Text(
+                        '${service.formattedStartTime} · ${service.formattedEndTime}',
+                      ),
+                      trailing: Text('R\$ ${service.price.toStringAsFixed(0)}'),
+                    ),
+                  );
+                }).toList(),
           );
         }),
       ],
@@ -230,7 +239,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
         children: [
           // Total row
           Obx(() {
-            final apt = controller.appointment.value;
+            final apt = controller.appoimentCheckout.value;
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -243,7 +252,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
                   ),
                 ),
                 Text(
-                  'R\$ ${apt?.totalPrice.toStringAsFixed(0) ?? '0'}',
+                  'R\$ ${apt?.totalPriceServices.toStringAsFixed(0) ?? '0'}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

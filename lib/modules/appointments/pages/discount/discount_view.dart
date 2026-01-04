@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salon_one_comander/modules/appointments/pages/discount/discount_controller.dart';
+import 'package:salon_one_comander/shared/routes/app_routes.dart';
 
 class DiscountView extends GetView<DiscountController> {
   const DiscountView({super.key});
@@ -17,9 +18,28 @@ class DiscountView extends GetView<DiscountController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("A pagar"),
+
                 Obx(
-                  () => Text(
-                    "${controller.appointmentModel.totalPrice * (1 - controller.selectedDiscount.value / 100)}",
+                  () => Row(
+                    children: [
+                      Visibility(
+                        visible: controller.selectedDiscount.value > 0,
+                        child: Text(
+                          "${controller.appoimentCheckout.value?.totalPriceServices}",
+                          style: TextStyle(
+                            color: Colors.red,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "${controller.appoimentCheckout.value!.totalPriceServices * (1 - controller.selectedDiscount.value / 100)}",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -43,7 +63,7 @@ class DiscountView extends GetView<DiscountController> {
                       child: InkWell(
                         onTap: () {
                           controller.handleSelectedDiscount(
-                            controller.discounts[index],
+                            controller.discounts[index].toDouble(),
                           );
                         },
                         child: Center(
@@ -71,7 +91,12 @@ class DiscountView extends GetView<DiscountController> {
       bottomNavigationBar: BottomAppBar(
         child: ElevatedButton(
           onPressed: () {
-            Get.back();
+            Get.toNamed(
+              Routes.paymentType,
+              arguments: {
+                "appointmentCheckout": controller.appoimentCheckout.value,
+              },
+            );
           },
           child: Text("Confirmar"),
         ),
