@@ -141,7 +141,7 @@ class PaymentTypeView extends GetView<PaymentTypeController> {
           type: PaymentType.dinheiro,
           icon: Icons.payments_outlined,
           label: 'Dinheiro',
-          isSelected: payments.any((p) => p.type == PaymentType.dinheiro),
+          isSelected: false,
         ),
         _buildPaymentOption(
           context,
@@ -149,7 +149,7 @@ class PaymentTypeView extends GetView<PaymentTypeController> {
           type: PaymentType.credito,
           icon: Icons.credit_card,
           label: 'Crédito',
-          isSelected: payments.any((p) => p.type == PaymentType.credito),
+          isSelected: false,
         ),
         _buildPaymentOption(
           context,
@@ -157,7 +157,7 @@ class PaymentTypeView extends GetView<PaymentTypeController> {
           type: PaymentType.debito,
           icon: Icons.credit_card_outlined,
           label: 'Débito',
-          isSelected: payments.any((p) => p.type == PaymentType.debito),
+          isSelected: false,
         ),
       ],
     );
