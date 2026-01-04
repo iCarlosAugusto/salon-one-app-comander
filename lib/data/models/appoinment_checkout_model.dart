@@ -4,7 +4,7 @@ import 'package:salon_one_comander/data/models/payment_entry_model.dart';
 
 class AppoimentCheckoutModel {
   final AppointmentModel appointmentModel;
-  final List<PaymentEntryModel> payments;
+  List<PaymentEntryModel> payments;
   double _discount;
   final List<AppointmentServiceItem> services;
   List<AppointmentServiceItem> newServicesAdded;
@@ -13,16 +13,18 @@ class AppoimentCheckoutModel {
     required this.appointmentModel,
     required this.services,
     double discount = 0,
-    this.payments = const [],
-    this.newServicesAdded = const [],
-  }) : _discount = discount;
+    List<PaymentEntryModel>? payments,
+    List<AppointmentServiceItem>? newServicesAdded,
+  }) : _discount = discount,
+       payments = payments ?? [],
+       newServicesAdded = newServicesAdded ?? [];
 
   double get totalPricePayments {
     if (payments.isEmpty) return 0;
     return payments.fold(0, (sum, entry) => sum + entry.amount);
   }
 
-  addPayment(PaymentEntryModel payment) {
+  void addPayment(PaymentEntryModel payment) {
     payments.add(payment);
   }
 

@@ -43,14 +43,6 @@ class SplitPaymentController extends GetxController {
     }
   }
 
-  /// Navigate to payment type selection to add more payments
-  void addPaymentMethod() {
-    Get.toNamed(
-      Routes.paymentType,
-      arguments: {'appointmentCheckout': appointmentCheckout},
-    );
-  }
-
   /// Save as partial payment
   void saveAsPartial() {
     Get.snackbar('Salvo', 'Pagamento parcial salvo');
