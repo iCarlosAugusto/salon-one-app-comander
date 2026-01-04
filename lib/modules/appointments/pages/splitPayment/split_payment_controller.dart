@@ -20,15 +20,10 @@ class SplitPaymentController extends GetxController {
   void onInit() {
     super.onInit();
     appointmentCheckout = Get.arguments['appointmentCheckout'];
-    // selectedDiscount = Get.arguments['selectedDiscount'];
-    // finalPrice = Get.arguments['finalPrice'];
     selectedDiscount = appointmentCheckout.discount.toInt();
     finalPrice = appointmentCheckout.totalPriceServicesDiscount;
 
-    // Load existing payments
-    if (Get.arguments['payments'] != null) {
-      payments.value = List<PaymentEntryModel>.from(Get.arguments['payments']);
-    }
+    payments.value = List<PaymentEntryModel>.from(appointmentCheckout.payments);
   }
 
   /// Amount already paid
@@ -52,11 +47,7 @@ class SplitPaymentController extends GetxController {
   void addPaymentMethod() {
     Get.toNamed(
       Routes.paymentType,
-      arguments: {
-        'appointmentCheckout': appointmentCheckout,
-        'selectedDiscount': selectedDiscount,
-        'payments': payments.toList(),
-      },
+      arguments: {'appointmentCheckout': appointmentCheckout},
     );
   }
 

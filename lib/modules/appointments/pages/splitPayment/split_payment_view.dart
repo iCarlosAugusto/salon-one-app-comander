@@ -10,10 +10,6 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Dividir pagamento"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),

@@ -19,10 +19,7 @@ class PaymentTypeController extends GetxController {
     super.onInit();
     appointmentCheckout = Get.arguments['appointmentCheckout'];
 
-    // Check if we're coming back from split payment with existing payments
-    if (Get.arguments['payments'] != null) {
-      payments.value = List<PaymentEntryModel>.from(Get.arguments['payments']);
-    }
+    payments.value = List<PaymentEntryModel>.from(appointmentCheckout.payments);
   }
 
   /// Total price after discount
