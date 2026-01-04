@@ -24,8 +24,21 @@ class AppoimentCheckoutModel {
     return payments.fold(0, (sum, entry) => sum + entry.amount);
   }
 
+  /// Add a payment entry. If a payment with the same type exists, merge the amounts.
   void addPayment(PaymentEntryModel payment) {
-    payments.add(payment);
+    final existingIndex = payments.indexWhere((p) => p.type == payment.type);
+
+    if (existingIndex != -1) {
+      // Merge with existing payment of same type
+      final existing = payments[existingIndex];
+      payments[existingIndex] = PaymentEntryModel(
+        type: payment.type,
+        amount: existing.amount + payment.amount,
+      );
+    } else {
+      // Add new payment type
+      payments.add(payment);
+    }
   }
 
   double get discount => _discount;

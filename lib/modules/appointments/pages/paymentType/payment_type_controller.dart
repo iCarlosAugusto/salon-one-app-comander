@@ -18,6 +18,7 @@ class PaymentTypeController extends GetxController {
   void onInit() {
     super.onInit();
     appointmentCheckout = Get.arguments['appointmentCheckout'];
+    appointmentCheckout.payments = [];
 
     payments.value = List<PaymentEntryModel>.from(appointmentCheckout.payments);
   }
