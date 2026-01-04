@@ -7,6 +7,8 @@ class FeedbackView extends GetView<FeedbackController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -20,71 +22,78 @@ class FeedbackView extends GetView<FeedbackController> {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: theme.colorScheme.primaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle,
                     size: 60,
-                    color: Colors.green,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 32),
 
                 // Success title
-                const Text(
+                Text(
                   'Pagamento concluído!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
                 // Total paid
                 Text(
                   'Total: R\$ ${controller.totalPaid.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18, color: Colors.grey.shade400),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 8),
 
                 // Payment methods used
                 Text(
                   '${controller.payments.length} forma(s) de pagamento',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
 
                 const Spacer(),
 
                 // Action buttons
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: controller.goToAppointments,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                FilledButton(
+                  onPressed: controller.goToAppointments,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      'Ir para agendamentos',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                  ),
+                  child: const Text(
+                    'Ir para agendamentos',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: controller.startNewAppointment,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                OutlinedButton(
+                  onPressed: controller.startNewAppointment,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 52),
+                    side: BorderSide(
+                      color: theme.colorScheme.outline.withOpacity(0.3),
                     ),
-                    child: const Text(
-                      'Novo agendamento',
-                      style: TextStyle(fontSize: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Novo agendamento',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),

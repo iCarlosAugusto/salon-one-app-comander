@@ -9,6 +9,7 @@ import '../../data/services/appointment_service.dart';
 import '../../data/services/local_notification_service.dart';
 import '../../data/services/firebase_messaging_service.dart';
 import '../../data/services/notification_navigation_service.dart';
+import '../../data/services/checkout_service.dart';
 
 /// Initial bindings for dependency injection
 class InitialBinding extends Bindings {
@@ -25,6 +26,9 @@ class InitialBinding extends Bindings {
     Get.put(LocalNotificationsService(), permanent: true);
     Get.put(FirebaseMessagingService(), permanent: true);
     Get.put(NotificationNavigationService(), permanent: true);
+
+    // Checkout Service - for checkout flow state management
+    Get.put(CheckoutService(), permanent: true);
 
     // Domain Services
     Get.lazyPut(() => SalonService(), fenix: true);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salon_one_comander/data/models/payment_entry_model.dart';
+import 'package:salon_one_comander/data/services/checkout_service.dart';
 import 'split_payment_controller.dart';
 
 class SplitPaymentView extends GetView<SplitPaymentController> {
@@ -9,6 +10,7 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final checkoutService = Get.find<CheckoutService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +31,7 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Price summary
-              _buildPriceSummary(context, theme),
+              _buildPriceSummary(context, theme, checkoutService),
               const SizedBox(height: 24),
 
               // Section title
@@ -44,7 +46,9 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
               // Payment entries list
               Expanded(
                 child: Obx(() {
-                  final payments = controller.payments.toList();
+                  // Access checkout to trigger reactivity
+                  final _ = checkoutService.checkout.value;
+                  final payments = controller.payments;
                   return _buildPaymentsList(context, theme, payments);
                 }),
               ),
@@ -52,12 +56,16 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context, theme),
+      bottomNavigationBar: _buildBottomBar(context, theme, checkoutService),
     );
   }
 
   /// Price summary card
-  Widget _buildPriceSummary(BuildContext context, ThemeData theme) {
+  Widget _buildPriceSummary(
+    BuildContext context,
+    ThemeData theme,
+    CheckoutService checkoutService,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -66,10 +74,12 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
       ),
       child: Obx(() {
+        // Access checkout to trigger reactivity
+        final _ = checkoutService.checkout.value;
         final totalPrice = controller.finalPrice;
         final remainingAmount = controller.remainingAmount;
         final paidAmount = controller.paidAmount;
-        final isFullyPaid = remainingAmount <= 0;
+        final isFullyPaid = controller.isFullyPaid;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +309,11 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
   }
 
   /// Bottom navigation bar
-  Widget _buildBottomBar(BuildContext context, ThemeData theme) {
+  Widget _buildBottomBar(
+    BuildContext context,
+    ThemeData theme,
+    CheckoutService checkoutService,
+  ) {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -310,7 +324,9 @@ class SplitPaymentView extends GetView<SplitPaymentController> {
           ),
         ),
         child: Obx(() {
-          final isFullyPaid = controller.remainingAmount <= 0;
+          // Access checkout to trigger reactivity
+          final _ = checkoutService.checkout.value;
+          final isFullyPaid = controller.isFullyPaid;
 
           return Row(
             children: [

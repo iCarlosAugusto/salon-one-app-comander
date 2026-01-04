@@ -1,118 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:salon_one_comander/data/models/appoinment_checkout_model.dart';
 import 'package:salon_one_comander/data/models/payment_entry_model.dart';
 import 'package:salon_one_comander/data/services/appointment_service.dart';
+import 'package:salon_one_comander/data/services/checkout_service.dart';
 import 'package:salon_one_comander/shared/routes/app_routes.dart';
 
 class PaymentTypeController extends GetxController {
-  late AppoimentCheckoutModel appointmentCheckout;
-
-  final AppointmentService _appointmentService = Get.find<AppointmentService>();
+  final _checkoutService = Get.find<CheckoutService>();
+  final _appointmentService = Get.find<AppointmentService>();
   final isLoading = false.obs;
-
-  /// List of payment entries (for split payments)
-  final payments = <PaymentEntryModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    appointmentCheckout = Get.arguments['appointmentCheckout'];
-    appointmentCheckout.payments = [];
-
-    payments.value = List<PaymentEntryModel>.from(appointmentCheckout.payments);
+    // Clear any existing payments when entering payment type screen
+    // Defer to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkoutService.clearPayments();
+    });
   }
 
   /// Total price after discount
-  double get finalPrice {
-    return appointmentCheckout.totalPriceServicesDiscount;
-  }
+  double get finalPrice => _checkoutService.totalPrice;
 
   /// Amount already paid
-  double get paidAmount {
-    return payments.fold(0.0, (sum, entry) => sum + entry.amount);
-  }
+  double get paidAmount => _checkoutService.paidAmount;
 
   /// Remaining amount to pay
-  double get remainingAmount {
-    return finalPrice - paidAmount;
-  }
+  double get remainingAmount => _checkoutService.remainingAmount;
+
+  /// Get all payments
+  List<PaymentEntryModel> get payments => _checkoutService.payments;
 
   /// Add a payment entry
   Future<void> addPayment(PaymentType type, double amount) async {
-    payments.add(PaymentEntryModel(type: type, amount: amount));
+    _checkoutService.addPayment(PaymentEntryModel(type: type, amount: amount));
 
     // Check if fully paid
-    if (remainingAmount <= 0) {
+    if (_checkoutService.isFullyPaid) {
       // Call checkout API and navigate to feedback page
       await _checkout();
     } else {
-      appointmentCheckout.addPayment(
-        PaymentEntryModel(type: type, amount: amount),
-      );
-
-      // Navigate to split payment page
-      Get.toNamed(
-        Routes.splitPayment,
-        arguments: {
-          'appointmentCheckout': appointmentCheckout,
-          'payments': payments.toList(),
-          'finalPrice': finalPrice,
-        },
-      );
+      // Navigate to split payment page (no arguments needed)
+      Get.toNamed(Routes.splitPayment);
     }
   }
 
   /// Checkout the appointment via API
   Future<void> _checkout() async {
-    // isLoading.value = true;
+    isLoading.value = true;
 
-    // try {
-    //   final paymentsJson = payments.map((p) => p.toApiJson()).toList();
-    //   print(paymentsJson);
-    //   final response = await _appointmentService.checkoutAppointment(
-    //     appointmentModel.id,
-    //     payments: paymentsJson,
-    //     services: appoimentCheckout.value?.services,
-    //   );
+    try {
+      final paymentsJson = payments.map((p) => p.toApiJson()).toList();
+      print('Checkout payments: $paymentsJson');
 
-    //   if (response.isSuccess && response.data != null) {
-    //     // Navigate to feedback page with updated appointment
-    //     Get.offNamedUntil(
-    //       Routes.paymentFeedback,
-    //       (route) => route.settings.name == Routes.appointments,
-    //       arguments: {
-    //         'appointment': response.data,
-    //         'payments': payments.toList(),
-    //       },
-    //     );
-    //   } else {
-    //     Get.snackbar(
-    //       'Erro',
-    //       response.error ?? 'Erro ao processar pagamento',
-    //       snackPosition: SnackPosition.BOTTOM,
-    //       backgroundColor: Colors.red,
-    //       colorText: Colors.white,
-    //     );
-    //   }
-    // } catch (e) {
-    //   Get.snackbar(
-    //     'Erro',
-    //     'Erro ao processar pagamento: $e',
-    //     snackPosition: SnackPosition.BOTTOM,
-    //     backgroundColor: Colors.red,
-    //     colorText: Colors.white,
-    //   );
-    // } finally {
-    //   isLoading.value = false;
-    // }
+      // TODO: Implement API call
+      // final response = await _appointmentService.checkoutAppointment(
+      //   _checkoutService.appointment!.id,
+      //   payments: paymentsJson,
+      // );
+
+      // Navigate to feedback page
+      Get.offNamedUntil(
+        Routes.paymentFeedback,
+        (route) => route.settings.name == Routes.appointments,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Erro',
+        'Erro ao processar pagamento: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   /// Remove a payment entry by index
   void removePayment(int index) {
-    if (index >= 0 && index < payments.length) {
-      payments.removeAt(index);
-    }
+    _checkoutService.removePayment(index);
   }
 
   /// Show dialog to enter payment amount
@@ -187,6 +155,7 @@ class PaymentTypeController extends GetxController {
   }
 
   void saveAsNotPaid() {
+    _checkoutService.clear();
     Get.snackbar('Salvo', 'Agendamento salvo como não pago');
     Get.back();
   }

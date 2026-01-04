@@ -1,58 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:salon_one_comander/data/models/appoinment_checkout_model.dart';
 import 'package:salon_one_comander/data/models/payment_entry_model.dart';
 import 'package:salon_one_comander/data/services/appointment_service.dart';
+import 'package:salon_one_comander/data/services/checkout_service.dart';
 import 'package:salon_one_comander/shared/routes/app_routes.dart';
 
 class SplitPaymentController extends GetxController {
-  late AppoimentCheckoutModel appointmentCheckout;
-  late int selectedDiscount;
-  late double finalPrice;
-
-  final AppointmentService _appointmentService = Get.find<AppointmentService>();
+  final _checkoutService = Get.find<CheckoutService>();
+  final _appointmentService = Get.find<AppointmentService>();
   final isLoading = false.obs;
 
-  /// List of payment entries
-  final payments = <PaymentEntryModel>[].obs;
+  /// Get total price after discount
+  double get finalPrice => _checkoutService.totalPrice;
 
-  @override
-  void onInit() {
-    super.onInit();
-    appointmentCheckout = Get.arguments['appointmentCheckout'];
-    selectedDiscount = appointmentCheckout.discount.toInt();
-    finalPrice = appointmentCheckout.totalPriceServicesDiscount;
+  /// Get discount percentage
+  int get selectedDiscount => _checkoutService.discount.toInt();
 
-    payments.value = List<PaymentEntryModel>.from(appointmentCheckout.payments);
-  }
+  /// Get all payments
+  List<PaymentEntryModel> get payments => _checkoutService.payments;
 
   /// Amount already paid
-  double get paidAmount {
-    return payments.fold(0.0, (sum, entry) => sum + entry.amount);
-  }
+  double get paidAmount => _checkoutService.paidAmount;
 
   /// Remaining amount to pay
-  double get remainingAmount {
-    return finalPrice - paidAmount;
-  }
+  double get remainingAmount => _checkoutService.remainingAmount;
+
+  /// Check if fully paid
+  bool get isFullyPaid => _checkoutService.isFullyPaid;
 
   /// Remove a payment entry by index
   void removePayment(int index) {
-    if (index >= 0 && index < payments.length) {
-      payments.removeAt(index);
-    }
+    _checkoutService.removePayment(index);
   }
 
   /// Save as partial payment
   void saveAsPartial() {
+    _checkoutService.clear();
     Get.snackbar('Salvo', 'Pagamento parcial salvo');
-    // Navigate back to appointment details or home
     Get.offAllNamed(Routes.appointments);
   }
 
   /// Complete payment if fully paid - calls checkout API
   Future<void> completePayment() async {
-    if (remainingAmount > 0) {
+    if (!isFullyPaid) {
       Get.snackbar(
         'Atenção',
         'Ainda há valor pendente para pagamento',
@@ -65,31 +55,19 @@ class SplitPaymentController extends GetxController {
 
     try {
       final paymentsJson = payments.map((p) => p.toApiJson()).toList();
+      print('Checkout payments: $paymentsJson');
 
+      // TODO: Implement API call
       // final response = await _appointmentService.checkoutAppointment(
-      //   appointmentModel.id,
+      //   _checkoutService.appointment!.id,
       //   payments: paymentsJson,
       // );
 
-      // if (response.isSuccess && response.data != null) {
-      //   // Navigate to feedback page with updated appointment
-      //   Get.offNamedUntil(
-      //     Routes.paymentFeedback,
-      //     (route) => route.settings.name == Routes.appointments,
-      //     arguments: {
-      //       'appointment': response.data,
-      //       'payments': payments.toList(),
-      //     },
-      //   );
-      // } else {
-      //   Get.snackbar(
-      //     'Erro',
-      //     response.error ?? 'Erro ao processar pagamento',
-      //     snackPosition: SnackPosition.BOTTOM,
-      //     backgroundColor: Colors.red,
-      //     colorText: Colors.white,
-      //   );
-      // }
+      // Navigate to feedback page
+      Get.offNamedUntil(
+        Routes.paymentFeedback,
+        (route) => route.settings.name == Routes.appointments,
+      );
     } catch (e) {
       Get.snackbar(
         'Erro',

@@ -41,6 +41,10 @@ class AppoimentCheckoutModel {
     }
   }
 
+  void removePaymentByIndex(int index) {
+    payments.removeAt(index);
+  }
+
   double get discount => _discount;
 
   set discount(double value) {

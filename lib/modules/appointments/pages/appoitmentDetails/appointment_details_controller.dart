@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:salon_one_comander/data/models/appoinment_checkout_model.dart';
 import 'package:salon_one_comander/data/models/service_model.dart';
+import 'package:salon_one_comander/data/services/checkout_service.dart';
 import 'package:salon_one_comander/shared/routes/app_routes.dart';
 import '../../../../data/models/appointment_model.dart';
 import '../../../../data/models/appointment_service_item.dart';
@@ -10,13 +10,16 @@ import '../../../../data/services/appointment_service.dart';
 /// Controller for appointment details page
 class AppointmentDetailsController extends GetxController {
   final _appointmentService = Get.find<AppointmentService>();
+  final _checkoutService = Get.find<CheckoutService>();
 
   // Loading states
   final isLoading = false.obs;
   final isSaving = false.obs;
 
-  // Data
-  final appoimentCheckout = Rxn<AppoimentCheckoutModel>();
+  // Local appointment data (before checkout starts)
+  final _appointment = Rxn<AppointmentModel>();
+  final _services = <AppointmentServiceItem>[].obs;
+  final _newServicesAdded = <AppointmentServiceItem>[].obs;
 
   @override
   void onInit() {
@@ -28,30 +31,22 @@ class AppointmentDetailsController extends GetxController {
   void _loadInitialData() {
     final args = Get.arguments;
     if (args != null && args['appointment'] != null) {
-      appoimentCheckout.value = AppoimentCheckoutModel(
-        appointmentModel: args['appointment'] as AppointmentModel,
-        payments: [],
-        services: [],
-        newServicesAdded: [],
-      );
+      _appointment.value = args['appointment'] as AppointmentModel;
       _loadAppointmentServices();
     }
   }
 
   /// Load services for this appointment from API
   Future<void> _loadAppointmentServices() async {
-    final apt = appoimentCheckout.value?.appointmentModel;
+    final apt = _appointment.value;
     if (apt == null) return;
 
     isLoading.value = true;
     try {
       final response = await _appointmentService.getAppointmentServices(apt.id);
       if (response.isSuccess && response.data != null) {
-        appoimentCheckout.value?.services.addAll(response.data!);
-        appoimentCheckout.refresh();
-        debugPrint(
-          'Loaded ${appoimentCheckout.value?.services.length} services for appointment',
-        );
+        _services.addAll(response.data!);
+        debugPrint('Loaded ${_services.length} services for appointment');
       } else {
         debugPrint('Failed to load services: ${response.error}');
       }
@@ -62,9 +57,23 @@ class AppointmentDetailsController extends GetxController {
     }
   }
 
+  /// Get appointment model
+  AppointmentModel? get appointment => _appointment.value;
+
+  /// Get all services (original + new)
+  List<AppointmentServiceItem> get allServices => [
+    ..._services,
+    ..._newServicesAdded,
+  ];
+
+  /// Get total price of all services
+  double get totalPriceServices {
+    return allServices.fold(0.0, (sum, service) => sum + service.price);
+  }
+
   /// Get formatted date for display (e.g., "domingo 21 dez")
   String get formattedDate {
-    final apt = appoimentCheckout.value?.appointmentModel;
+    final apt = _appointment.value;
     if (apt == null) return '';
 
     final date = apt.date;
@@ -97,14 +106,14 @@ class AppointmentDetailsController extends GetxController {
 
   /// Get start time for display
   String get startTime {
-    final apt = appoimentCheckout.value?.appointmentModel;
+    final apt = _appointment.value;
     if (apt == null) return '';
     return apt.startTime.substring(0, 5); // HH:MM
   }
 
   /// Get formatted duration
   String get formattedDuration {
-    final apt = appoimentCheckout.value?.appointmentModel;
+    final apt = _appointment.value;
     if (apt == null) return '';
 
     final minutes = apt.totalDuration;
@@ -124,13 +133,11 @@ class AppointmentDetailsController extends GetxController {
     final result = await Get.toNamed(
       Routes.serviceSelection,
       arguments: {
-        'selectedServiceIds': appoimentCheckout.value?.newServicesAdded
-            .map((s) => s.id)
-            .toList(),
+        'selectedServiceIds': _newServicesAdded.map((s) => s.id).toList(),
       },
     );
     if (result != null && result is List<ServiceModel>) {
-      List<AppointmentServiceItem> servicesAdded = result
+      _newServicesAdded.value = result
           .map(
             (e) => AppointmentServiceItem(
               id: e.id,
@@ -143,16 +150,18 @@ class AppointmentDetailsController extends GetxController {
             ),
           )
           .toList();
-      appoimentCheckout.value?.newServicesAdded = servicesAdded;
-      appoimentCheckout.refresh();
     }
   }
 
-  /// Checkout appointment
+  /// Start checkout flow - initializes CheckoutService and navigates to discount
   void checkout() {
-    Get.toNamed(
-      Routes.discount,
-      arguments: {'appointmentCheckout': appoimentCheckout.value},
-    );
+    final apt = _appointment.value;
+    if (apt == null) return;
+
+    // Initialize checkout in the global service
+    _checkoutService.startCheckout(appointment: apt, services: allServices);
+
+    // Navigate to discount page (no arguments needed)
+    Get.toNamed(Routes.discount);
   }
 }

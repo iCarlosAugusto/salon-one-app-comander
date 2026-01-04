@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:salon_one_comander/data/models/appoinment_checkout_model.dart';
+import 'package:salon_one_comander/data/models/appointment_model.dart';
 import 'package:salon_one_comander/data/models/appointment_service_item.dart';
 import 'appointment_details_controller.dart';
 
@@ -24,7 +24,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
         elevation: 0,
       ),
       body: Obx(() {
-        final apt = controller.appoimentCheckout.value;
+        final apt = controller.appointment;
         if (apt == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -68,11 +68,10 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
   Widget _buildClientCard(
     BuildContext context,
     ThemeData theme,
-    AppoimentCheckoutModel apt,
+    AppointmentModel apt,
   ) {
-    final clientName = apt.appointmentModel.clientName;
-    final clientContact =
-        apt.appointmentModel.clientEmail ?? apt.appointmentModel.clientPhone;
+    final clientName = apt.clientName;
+    final clientContact = apt.clientEmail ?? apt.clientPhone;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -274,10 +273,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
             );
           }
 
-          final services = [
-            ...controller.appoimentCheckout.value?.services ?? [],
-            ...controller.appoimentCheckout.value?.newServicesAdded ?? [],
-          ];
+          final services = controller.allServices;
 
           if (services.isEmpty) {
             return _buildEmptyServicesCard(context, theme);
@@ -404,8 +400,7 @@ class AppointmentDetailsView extends GetView<AppointmentDetailsController> {
           children: [
             // Total row
             Obx(() {
-              final apt = controller.appoimentCheckout.value;
-              final total = apt?.totalPriceServices ?? 0;
+              final total = controller.totalPriceServices;
 
               return Container(
                 padding: const EdgeInsets.symmetric(

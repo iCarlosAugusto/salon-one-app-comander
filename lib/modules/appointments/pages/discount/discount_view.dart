@@ -61,10 +61,9 @@ class DiscountView extends GetView<DiscountController> {
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
       ),
       child: Obx(() {
-        final totalPrice =
-            controller.appoimentCheckout.value?.totalPriceServices ?? 0;
+        final totalPrice = controller.totalPriceWithoutDiscount;
         final discount = controller.selectedDiscount.value;
-        final discountedPrice = totalPrice * (1 - discount / 100);
+        final discountedPrice = controller.totalPrice;
         final hasDiscount = discount > 0;
 
         return Column(
@@ -222,12 +221,8 @@ class DiscountView extends GetView<DiscountController> {
         ),
         child: FilledButton(
           onPressed: () {
-            Get.toNamed(
-              Routes.paymentType,
-              arguments: {
-                "appointmentCheckout": controller.appoimentCheckout.value,
-              },
-            );
+            // Navigate without arguments - checkout service has the data
+            Get.toNamed(Routes.paymentType);
           },
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
