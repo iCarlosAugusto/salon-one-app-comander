@@ -159,4 +159,26 @@ class AppointmentService extends GetxService {
       decoder: (data) => data as Map<String, dynamic>,
     );
   }
+
+  /// Checkout an appointment with payments and optional extra services
+  ///
+  /// [appointmentId] - The appointment ID to checkout
+  /// [payments] - List of payment entries with method (CASH, CREDIT_CARD, DEBIT_CARD) and amount
+  /// [extraServices] - Optional list of extra services with serviceId and employeeId
+  Future<void> checkoutAppointment({
+    required String appointmentId,
+    required List<Map<String, dynamic>> payments,
+    List<Map<String, dynamic>>? extraServices,
+  }) async {
+    final body = <String, dynamic>{'payments': payments};
+
+    if (extraServices != null && extraServices.isNotEmpty) {
+      body['extraServices'] = extraServices;
+    }
+
+    await _client.postRequest<AppointmentModel>(
+      ApiEndpoints.checkoutAppointment(appointmentId),
+      body: body,
+    );
+  }
 }

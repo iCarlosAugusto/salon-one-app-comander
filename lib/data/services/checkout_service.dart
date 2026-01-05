@@ -75,6 +75,21 @@ class CheckoutService extends GetxService {
     checkout.refresh();
   }
 
+  /// Get new services added (not from original appointment)
+  List<AppointmentServiceItem> get newServicesAdded =>
+      checkout.value?.newServicesAdded ?? [];
+
+  /// Get extra services formatted for API
+  /// Format: [{serviceId: "...", employeeId: "..."}]
+  List<Map<String, dynamic>> getExtraServicesJson(String currentEmployeeId) {
+    return newServicesAdded.map((service) {
+      return {
+        'serviceId': service.id,
+        'employeeId': service.employee?.id ?? currentEmployeeId,
+      };
+    }).toList();
+  }
+
   /// Clear checkout and reset state
   void clear() {
     checkout.value = null;

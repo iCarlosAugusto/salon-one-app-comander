@@ -51,14 +51,31 @@ class PaymentTypeController extends GetxController {
     isLoading.value = true;
 
     try {
-      final paymentsJson = payments.map((p) => p.toApiJson()).toList();
-      print('Checkout payments: $paymentsJson');
+      final appointmentId = _checkoutService.appointment?.id;
+      if (appointmentId == null) {
+        throw Exception('Appointment not found');
+      }
 
-      // TODO: Implement API call
-      // final response = await _appointmentService.checkoutAppointment(
-      //   _checkoutService.appointment!.id,
-      //   payments: paymentsJson,
-      // );
+      // Format payments for API
+      final paymentsJson = payments.map((p) => p.toApiJson()).toList();
+
+      // Format extra services for API (using current employee's ID as fallback)
+      // TODO: Get current employee ID from session/auth service
+      final currentEmployeeId = _checkoutService.appointment?.employeeId ?? '';
+      final extraServicesJson = _checkoutService.getExtraServicesJson(
+        currentEmployeeId,
+      );
+
+      print('Checkout - appointmentId: $appointmentId');
+      print('Checkout - payments: $paymentsJson');
+      print('Checkout - extraServices: $extraServicesJson');
+
+      // Call checkout API
+      await _appointmentService.checkoutAppointment(
+        appointmentId: appointmentId,
+        payments: paymentsJson,
+        extraServices: extraServicesJson.isNotEmpty ? extraServicesJson : null,
+      );
 
       // Navigate to feedback page
       Get.offNamedUntil(

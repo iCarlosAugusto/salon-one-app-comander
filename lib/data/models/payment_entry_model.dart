@@ -20,15 +20,15 @@ class PaymentEntryModel {
     }
   }
 
-  /// Get API method name (CASH, CREDIT, DEBIT)
+  /// Get API method name (CASH, CREDIT_CARD, DEBIT_CARD)
   String get apiMethod {
     switch (type) {
       case PaymentType.dinheiro:
         return 'CASH';
       case PaymentType.credito:
-        return 'CREDIT';
+        return 'CREDIT_CARD';
       case PaymentType.debito:
-        return 'DEBIT';
+        return 'DEBIT_CARD';
     }
   }
 
